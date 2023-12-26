@@ -1,7 +1,7 @@
 # Dockerfile
 # Use the official lightweight Node.js 18 image.
 # https://hub.docker.com/_/node
-FROM node:latest
+FROM node:lts-buster-slim
 
 # Set the working directory
 WORKDIR /app
@@ -14,9 +14,3 @@ RUN npm cache clean --force && npm install
 
 # Copy local code to the container image.
 COPY . ./
-
-# Build the application
-RUN npm run build
-
-# Run the web service on container startup.
-CMD [ "npm", "start" ]

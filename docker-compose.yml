@@ -6,26 +6,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - 3000:3000
-    depends_on:
-      - db
-    environment:
-      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-    # 開発中のソース変更がdocker環境に反映されるようにvolumesを追加
+    tty: true
     volumes:
       - .:/app
-      - /app/node_modules
-
-  db:
-    image: postgres:13
-    restart: always
+    ports:
+      - 3000:3000
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-
-volumes:
-  postgres_data:
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+    command: sh -c "npm run dev"
