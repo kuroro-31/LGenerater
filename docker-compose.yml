@@ -12,6 +12,10 @@ services:
       - db
     environment:
       DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+    # 開発中のソース変更がdocker環境に反映されるようにvolumesを追加
+    volumes:
+      - .:/app
+      - /app/node_modules
 
   db:
     image: postgres:13
