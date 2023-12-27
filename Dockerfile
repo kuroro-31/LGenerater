@@ -1,5 +1,4 @@
 # Dockerfile
-# Use the official lightweight Node.js 18 image.
 # https://hub.docker.com/_/node
 FROM node:lts-buster-slim
 
