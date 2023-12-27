@@ -24,7 +24,7 @@ const Header = () => {
             </span>
             <h1 className="dark:text-white">
               {/* <Logo /> */}
-              <Image src="/logo.png" width={170} height={30} alt="" />
+              <Image src="/logo.svg" width={50} height={22} alt="" />
             </h1>
           </Link>
 
