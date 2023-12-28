@@ -37,7 +37,12 @@ export default function TopPage() {
         <div className="container mx-auto flex min-h-screen flex-col py-8">
           <div className="">
             <div className="">
-              <h3 className="mb-8 text-lg">すべてのテンプレート</h3>
+              <div className="mb-8 flex items-center">
+                <h3 className="text-lg mr-8">すべてのテンプレート</h3>
+                <Link href="/campaign/jp/1" className="btn">
+                  追加する
+                </Link>
+              </div>
               <div className="flex flex-wrap justify-between">
                 <div className="w-1/3 mb-8">
                   <div className="relative">

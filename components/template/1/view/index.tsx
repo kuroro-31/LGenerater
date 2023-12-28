@@ -26,6 +26,28 @@ export default function View1() {
   // デスクトップとモバイルの表示切り替え
   const [viewMode, setViewMode] = useState("mobile"); // 初期状態を'mobile'に設定
 
+  // HTMLの取得
+  const [htmlContent, setHtmlContent] = useState("");
+  useEffect(() => {
+    async function fetchHtml() {
+      const path = "components/template/1/code/campaign/jp/index.html";
+      const encodedPath = encodeURIComponent(path);
+      console.log(`Encoded path: ${encodedPath}`); // この行を追加
+      const url = `/api/loadHtml?path=${encodedPath}`;
+      console.log(`Fetching HTML from: ${url}`); // デバッグ追加
+
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setHtmlContent(data.htmlContent);
+      } else {
+        console.error("Failed to fetch HTML content");
+        console.error(`Response status: ${res.status}`); // デバッグ追加
+      }
+    }
+    fetchHtml();
+  }, []);
+
   return (
     <div className="">
       {/* ヘッダー */}
@@ -80,15 +102,20 @@ export default function View1() {
         {/* デスクトップ */}
         {viewMode === "desktop" && (
           <div className="desktop-prev">
-            <div className="desktop-prev__body"></div>
+            <div
+              className="desktop-prev__body"
+              dangerouslySetInnerHTML={{ __html: htmlContent }}
+            ></div>
           </div>
         )}
-
         {/* モバイル */}
         {viewMode === "mobile" && (
           <div className="p-8">
             <div className="mobile-prev mx-auto">
-              <div className="mobile-prev__body"></div>
+              <div
+                className="mobile-prev__body"
+                dangerouslySetInnerHTML={{ __html: htmlContent }}
+              ></div>
             </div>
           </div>
         )}
