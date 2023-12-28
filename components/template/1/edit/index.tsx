@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -18,7 +19,11 @@ export default function Edit1() {
   }, [isLoggedIn, router]);
   return (
     <div className="">
-      <EditHeader />
+      <EditHeader>
+        <button className="bg-primary text-white px-6 py-2 rounded-full text-sm">
+          ダウンロード
+        </button>
+      </EditHeader>
     </div>
   );
 }

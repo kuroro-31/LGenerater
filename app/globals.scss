@@ -161,3 +161,34 @@
   width: 29px;
   height: 29px;
 }
+
+.mobile-prev {
+  @apply relative h-[690px] w-[320px];
+}
+
+.mobile-prev:after,
+.mobile-prev:before {
+  background: #fff;
+  box-shadow: -15px 8px 20px -10px rgba(0, 0, 0, 0.2);
+  content: "";
+  display: inline-block;
+  height: 62px;
+  width: 100%;
+}
+.mobile-prev:before {
+  border-radius: 46px 46px 0 0;
+  margin-bottom: -3px;
+}
+
+.mobile-prev:after {
+  border-radius: 0 0 46px 46px;
+  margin-top: -3px;
+}
+
+.mobile-prev__body {
+  background-color: #c2c7cb;
+  box-shadow: -15px 8px 20px -10px rgba(0, 0, 0, 0.2);
+  height: 566px;
+  max-height: 566px;
+  width: 320px;
+}

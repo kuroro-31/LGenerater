@@ -20,7 +20,7 @@ const Header = () => {
 
   return (
     <header className="w-full flex-none border-b border-comiee">
-      <div className="py-4 lg:px-4 lg:border-0 mx-4 lg:mx-0">
+      <div className="container mx-auto py-4">
         <div className="relative flex items-center">
           {/* ロゴ */}
           <Link

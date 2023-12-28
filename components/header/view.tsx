@@ -1,17 +1,20 @@
 "use client";
-
 import Image from "next/image";
 import Link from "next/link";
+import { ReactNode } from "react";
 
+interface ViewHeaderProps {
+  children: ReactNode;
+}
 /*
 |--------------------------------------------------------------------------
 | ナビゲーション
 |--------------------------------------------------------------------------
 */
-const ViewHeader = () => {
+const ViewHeader = ({ children }: ViewHeaderProps) => {
   return (
     <header className="w-full flex-none border-b border-comiee">
-      <div className="py-4 lg:px-4 lg:border-0 mx-4 lg:mx-0">
+      <div className="container mx-auto py-6">
         <div className="relative flex items-center">
           {/* ロゴ */}
           <Link
@@ -29,7 +32,7 @@ const ViewHeader = () => {
           </Link>
 
           {/* メニュー */}
-          <div className="flex items-center md:ml-auto">表示</div>
+          {children}
         </div>
       </div>
     </header>

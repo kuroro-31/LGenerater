@@ -2,13 +2,17 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { ReactNode } from 'react';
 
+interface ViewHeaderProps {
+  children: ReactNode;
+}
 /*
 |--------------------------------------------------------------------------
 | ナビゲーション
 |--------------------------------------------------------------------------
 */
-const EditHeader = () => {
+const EditHeader = ({ children }: ViewHeaderProps) => {
   return (
     <header className="w-full flex-none border-b border-comiee">
       <div className="py-4 lg:px-4 lg:border-0 mx-4 lg:mx-0">
@@ -28,8 +32,9 @@ const EditHeader = () => {
             </h1>
           </Link>
 
+
           {/* メニュー */}
-          <div className="flex items-center md:ml-auto">編集</div>
+          <div className="flex items-center md:ml-auto">{children}</div>
         </div>
       </div>
     </header>
