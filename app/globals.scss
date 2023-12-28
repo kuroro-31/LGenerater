@@ -186,9 +186,10 @@
 }
 
 .mobile-prev__body {
-  background-color: #c2c7cb;
+  @apply bg-[#c2c7cb] h-[566px] max-h-[566px] w-[320px];
   box-shadow: -15px 8px 20px -10px rgba(0, 0, 0, 0.2);
-  height: 566px;
-  max-height: 566px;
-  width: 320px;
+}
+
+.desktop-prev__body {
+  @apply bg-[#c2c7cb] min-h-screen;
 }

@@ -13,7 +13,7 @@ interface ViewHeaderProps {
 */
 const ViewHeader = ({ children }: ViewHeaderProps) => {
   return (
-    <header className="w-full flex-none border-b border-comiee">
+    <header className="w-full flex-none border-b fixed bg-white top-0 z-50">
       <div className="container mx-auto py-6">
         <div className="relative flex items-center">
           {/* ロゴ */}
