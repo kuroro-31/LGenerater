@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -42,12 +43,18 @@ export default function TopPage() {
                     <div className="relative w-full h-full">
                       <div className="absolute opacity-50 bg-white w-full h-full"></div>
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer">
+                        <Link
+                          href="/template/1/edit"
+                          className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer block"
+                        >
                           編集
-                        </p>
-                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer">
+                        </Link>
+                        <Link
+                          href="/template/1/view"
+                          className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer block"
+                        >
                           表示
-                        </p>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -55,7 +62,6 @@ export default function TopPage() {
 
                 <h4 className="mt-4">割引キャンペーン</h4>
               </div>
-
               <div className="w-1/3 mb-8">
                 <div className="relative">
                   <Image
@@ -68,12 +74,18 @@ export default function TopPage() {
                     <div className="relative w-full h-full">
                       <div className="absolute opacity-50 bg-white w-full h-full"></div>
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer">
+                        <Link
+                          href="/template/2/edit"
+                          className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer block"
+                        >
                           編集
-                        </p>
-                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer">
+                        </Link>
+                        <Link
+                          href="/template/2/view"
+                          className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer block"
+                        >
                           表示
-                        </p>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -93,12 +105,18 @@ export default function TopPage() {
                     <div className="relative w-full h-full">
                       <div className="absolute opacity-50 bg-white w-full h-full"></div>
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer">
+                        <Link
+                          href="/template/3/edit"
+                          className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer block"
+                        >
                           編集
-                        </p>
-                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer">
+                        </Link>
+                        <Link
+                          href="/template/3/view"
+                          className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer block"
+                        >
                           表示
-                        </p>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -118,12 +136,18 @@ export default function TopPage() {
                     <div className="relative w-full h-full">
                       <div className="absolute opacity-50 bg-white w-full h-full"></div>
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer">
+                        <Link
+                          href="/template/4/edit"
+                          className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer block"
+                        >
                           編集
-                        </p>
-                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer">
+                        </Link>
+                        <Link
+                          href="/template/4/view"
+                          className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer block"
+                        >
                           表示
-                        </p>
+                        </Link>
                       </div>
                     </div>
                   </div>
