@@ -3,12 +3,21 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { useStore } from "@/store";
+
 /*
 |--------------------------------------------------------------------------
 | ナビゲーション
 |--------------------------------------------------------------------------
 */
 const Header = () => {
+  const { isLoggedIn, setLoggedIn } = useStore();
+
+  const handleLogout = () => {
+    setLoggedIn(false);
+    localStorage.removeItem("isLoggedIn");
+  };
+
   return (
     <header className="w-full flex-none border-b border-comiee">
       <div className="py-4 lg:px-4 lg:border-0 mx-4 lg:mx-0">
@@ -30,11 +39,11 @@ const Header = () => {
 
           {/* メニュー */}
           <div className="flex items-center md:ml-auto">
-            <div className="hidden lg:flex items-center">
-              <nav className="text-sm">
-                <div className="flex items-center"></div>
-              </nav>
-            </div>
+            {isLoggedIn && (
+              <button onClick={handleLogout} className="btn-border">
+                ログアウト
+              </button>
+            )}
           </div>
         </div>
       </div>

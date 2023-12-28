@@ -1,16 +1,9 @@
-"use client";
-
-import Footer from "@/components/footer";
-import Header from "@/components/header";
+import TopPage from "@/components/pages/top/toppage";
 
 export default function Home() {
   return (
     <div className="">
-      <Header />
-
-      <main className="bg-[#f8f8f8] flex min-h-screen flex-col items-center justify-between p-24"></main>
-
-      <Footer />
+      <TopPage />
     </div>
   );
 }
