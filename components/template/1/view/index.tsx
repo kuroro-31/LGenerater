@@ -1,12 +1,17 @@
+/*
+|--------------------------------------------------------------------------
+| テンプレート１ 表示画面
+|--------------------------------------------------------------------------
+*/
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import ViewHeader from "@/components/header/view";
-import { useWithAuth } from "@/hooks/useWithAuth";
+import ViewHeader from '@/components/header/view';
+import { useWithAuth } from '@/hooks/useWithAuth';
 
 export default function View1() {
   // すでにログインしてたらトップページへ
@@ -19,7 +24,7 @@ export default function View1() {
   }, [isLoggedIn, router]);
 
   // デスクトップとモバイルの表示切り替え
-  const [viewMode, setViewMode] = useState("desktop"); // 初期状態を'desktop'に設定
+  const [viewMode, setViewMode] = useState("mobile"); // 初期状態を'mobile'に設定
 
   return (
     <div className="">

@@ -1,17 +1,18 @@
+/*
+|--------------------------------------------------------------------------
+| テンプレート編集画面のヘッダー
+|--------------------------------------------------------------------------
+*/
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { ReactNode } from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import { ReactNode } from "react";
 
 interface ViewHeaderProps {
   children: ReactNode;
 }
-/*
-|--------------------------------------------------------------------------
-| ナビゲーション
-|--------------------------------------------------------------------------
-*/
+
 const EditHeader = ({ children }: ViewHeaderProps) => {
   return (
     <header className="w-full flex-none border-b border-comiee">
@@ -31,7 +32,6 @@ const EditHeader = ({ children }: ViewHeaderProps) => {
               <Image src="/logo.svg" width={50} height={22} alt="" />
             </h1>
           </Link>
-
 
           {/* メニュー */}
           <div className="flex items-center md:ml-auto">{children}</div>

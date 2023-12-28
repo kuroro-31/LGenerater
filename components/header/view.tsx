@@ -1,4 +1,10 @@
+/*
+|--------------------------------------------------------------------------
+| テンプレート表示画面のヘッダー
+|--------------------------------------------------------------------------
+*/
 "use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode } from "react";
@@ -6,11 +12,6 @@ import { ReactNode } from "react";
 interface ViewHeaderProps {
   children: ReactNode;
 }
-/*
-|--------------------------------------------------------------------------
-| ナビゲーション
-|--------------------------------------------------------------------------
-*/
 const ViewHeader = ({ children }: ViewHeaderProps) => {
   return (
     <header className="w-full flex-none border-b fixed bg-white top-0 z-50">

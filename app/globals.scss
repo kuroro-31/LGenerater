@@ -186,7 +186,7 @@
 }
 
 .mobile-prev__body {
-  @apply bg-[#c2c7cb] h-[566px] max-h-[566px] w-[320px];
+  @apply bg-[#c2c7cb] h-[566px] max-h-[566px] w-[320px] overflow-y-auto;
   box-shadow: -15px 8px 20px -10px rgba(0, 0, 0, 0.2);
 }
 

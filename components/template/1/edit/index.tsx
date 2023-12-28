@@ -1,6 +1,10 @@
+/*
+|--------------------------------------------------------------------------
+| テンプレート１ 編集画面
+|--------------------------------------------------------------------------
+*/
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
