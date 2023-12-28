@@ -30,7 +30,7 @@ export default function TopPage() {
           <div className="">
             <h3 className="mb-8 text-xl">すべてのテンプレート</h3>
             <div className="flex flex-wrap justify-between">
-              <div className="w-1/3 mb-8 cursor-pointer">
+              <div className="w-1/3 mb-8">
                 <div className="relative">
                   <Image
                     src={"https://placehold.jp/412x230.png"}
@@ -42,10 +42,10 @@ export default function TopPage() {
                     <div className="relative w-full h-full">
                       <div className="absolute opacity-50 bg-white w-full h-full"></div>
                       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4">
+                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer">
                           編集
                         </p>
-                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6">
+                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer">
                           表示
                         </p>
                       </div>
@@ -53,7 +53,83 @@ export default function TopPage() {
                   </div>
                 </div>
 
-                <h4 className="mt-4">テンプレート名</h4>
+                <h4 className="mt-4">割引キャンペーン</h4>
+              </div>
+
+              <div className="w-1/3 mb-8">
+                <div className="relative">
+                  <Image
+                    src={"https://placehold.jp/412x230.png"}
+                    alt={"テンプレート名"}
+                    width={410}
+                    height={230}
+                  />
+                  <div className="opacity-0 hover:opacity-100 z-50 absolute top-0 left-0 w-[410px] h-[230px]">
+                    <div className="relative w-full h-full">
+                      <div className="absolute opacity-50 bg-white w-full h-full"></div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer">
+                          編集
+                        </p>
+                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer">
+                          表示
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h4 className="mt-4">クーポン</h4>
+              </div>
+              <div className="w-1/3 mb-8">
+                <div className="relative">
+                  <Image
+                    src={"https://placehold.jp/412x230.png"}
+                    alt={"テンプレート名"}
+                    width={410}
+                    height={230}
+                  />
+                  <div className="opacity-0 hover:opacity-100 z-50 absolute top-0 left-0 w-[410px] h-[230px]">
+                    <div className="relative w-full h-full">
+                      <div className="absolute opacity-50 bg-white w-full h-full"></div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer">
+                          編集
+                        </p>
+                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer">
+                          表示
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h4 className="mt-4">ポイントバック</h4>
+              </div>
+              <div className="w-1/3 mb-8">
+                <div className="relative">
+                  <Image
+                    src={"https://placehold.jp/412x230.png"}
+                    alt={"テンプレート名"}
+                    width={410}
+                    height={230}
+                  />
+                  <div className="opacity-0 hover:opacity-100 z-50 absolute top-0 left-0 w-[410px] h-[230px]">
+                    <div className="relative w-full h-full">
+                      <div className="absolute opacity-50 bg-white w-full h-full"></div>
+                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <p className="text-white hover:opacity-80 text-lg bg-primary rounded-full py-2 px-6 mb-4 cursor-pointer">
+                          編集
+                        </p>
+                        <p className="text-primary bg-white hover:bg-primary hover:text-white text-lg border-primary rounded-full py-2 px-6 cursor-pointer">
+                          表示
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <h4 className="mt-4">プレゼント</h4>
               </div>
             </div>
           </div>
