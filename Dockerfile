@@ -5,8 +5,8 @@ FROM node:lts-buster-slim
 # Set the working directory
 WORKDIR /app
 
-# Install openssl（prismaで使用するため）
-RUN apt-get update -y && apt-get install -y openssl
+# Install openssl（prismaで使用するため）, make
+RUN apt-get update -y && apt-get install -y openssl && apt-get install -y make
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
