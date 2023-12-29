@@ -11,9 +11,51 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
-  name     String?
-  password String
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String?
+  password  String
+  websites  Website[]
+}
+
+model Website {
+  id          Int       @id @default(autoincrement())
+  title       String
+  users       User[]
+  templateId  Int?
+  template    Template?  @relation(fields: [templateId], references: [id])
+  elements    Element[]
+}
+
+model Template {
+  id       Int       @id @default(autoincrement())
+  name     String
+  content  String
+  websites Website[]
+  elements Element[]
+}
+
+// ・ウェブサイトの編集中に新しいElementを追加し、それを他のウェブサイトやテンプレートで再利用することが可能
+// ・ElementがWebsiteとTemplateの両方に関連付けられているため、同じElementを複数のWebsiteやTemplateで再利用することが可能
+model Element {
+  id          Int       @id @default(autoincrement())
+  type        ElementType
+  content     String
+  websiteId   Int?
+  website     Website?  @relation(fields: [websiteId], references: [id])
+  templateId  Int?
+  template    Template? @relation(fields: [templateId], references: [id])
+}
+
+enum ElementType {
+  HEADER
+  FOOTER
+  H1
+  H2
+  H3
+  H4
+  H5
+  H6
 }

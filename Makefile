@@ -1,6 +1,7 @@
 key:
 	cp .env.example .env.local
 reset:
+	rm -rf .next
 	rm -rf node_modules
 	rm package-lock.json
 	npm cache clear --force
@@ -30,11 +31,15 @@ d-stats:
 	docker stats
 d-exec:
 	docker-compose exec app bash
-pri-g:
-	npx prisma generate
+pri-migrate:
+	npx prisma migrate dev && npx prisma generate
 pri-s:
 	npx prisma studio
 pri-seed:
 	npx prisma db seed
 db-access: # -Uと-dの値は.envのDB_USERとDB_NAMEの値を入れる
 	docker-compose exec db psql -U johndoe -d mydb
+check-3000: # 3000を使ってる環境のチェック
+	lsof -i :3000
+kill-9: # 3000を使ってる環境のチェック
+	 kill -9 〇〇
