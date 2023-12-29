@@ -36,3 +36,5 @@ pri-s:
 	npx prisma studio
 pri-seed:
 	npx prisma db seed
+db-access: # -Uと-dの値は.envのDB_USERとDB_NAMEの値を入れる
+	docker-compose exec db psql -U johndoe -d mydb

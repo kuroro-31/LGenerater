@@ -24,9 +24,7 @@ const EditHeader = ({ children }: ViewHeaderProps) => {
             className="flex-none md:overflow-hidden md:w-auto"
             passHref
           >
-            <span className="sr-only">
-              Startrade - Stock Trading Social Networking Service
-            </span>
+            <span className="sr-only">LIX</span>
             <h1 className="dark:text-white">
               {/* <Logo /> */}
               <Image src="/logo.svg" width={50} height={22} alt="" />
