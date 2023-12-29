@@ -16,17 +16,23 @@ update:
 package-clear-legacy:
 	npm install --legacy-peer-deps --force
 	npm audit fix --force
-up:
+d-up:
 	docker-compose up
-up-d:
+d-up-d:
 	docker-compose up -d
 d-build:
 	docker-compose build --no-cache
-down:
+d-down:
 	docker-compose down
 d-clean:
 	docker images -q | xargs -r docker rmi -f && docker system prune -a
 d-stats:
 	docker stats
-exec:
-	docker exec -it lgenerater_app_1 /bin/bash
+d-exec:
+	docker-compose exec app bash
+pri-g:
+	npx prisma generate
+pri-s:
+	npx prisma studio
+pri-seed:
+	npx prisma db seed

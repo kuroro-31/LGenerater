@@ -5,14 +5,14 @@
 */
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-import Footer from "@/components/footer";
-import Header from "@/components/header";
-import { useWithAuth } from "@/hooks/useWithAuth";
+import Footer from '@/components/footer';
+import Header from '@/components/header';
+import { useWithAuth } from '@/hooks/useWithAuth';
 
 export default function TopPage() {
   const router = useRouter();
@@ -39,9 +39,9 @@ export default function TopPage() {
             <div className="">
               <div className="mb-8 flex items-center">
                 <h3 className="text-lg mr-8">すべてのテンプレート</h3>
-                <Link href="/campaign/jp/1" className="btn">
+                {/* <Link href="/campaign/jp/1" className="btn">
                   追加する
-                </Link>
+                </Link> */}
               </div>
               <div className="flex flex-wrap justify-between">
                 <div className="w-1/3 mb-8">
