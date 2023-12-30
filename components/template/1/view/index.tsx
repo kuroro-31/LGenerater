@@ -11,12 +11,12 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import ViewHeader from '@/components/header/view';
-import { useWithAuth } from '@/hooks/useWithAuth';
+import { useStore } from '@/store';
 
 export default function View1() {
-  // すでにログインしてたらトップページへ
+  // 未ログインの場合はログインページへ
   const router = useRouter();
-  const isLoggedIn = useWithAuth();
+  const { isLoggedIn } = useStore();
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/auth/login");

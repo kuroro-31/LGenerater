@@ -5,22 +5,22 @@
 */
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-import EditHeader from "@/components/header/edit";
-import { useWithAuth } from "@/hooks/useWithAuth";
+import EditHeader from '@/components/header/edit';
+import { useStore } from '@/store';
 
 export default function Edit1() {
+  // 未ログインの場合はログインページへ
   const router = useRouter();
-
-  // すでにログインしてたらトップページへ
-  const isLoggedIn = useWithAuth();
+  const { isLoggedIn } = useStore();
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/auth/login");
     }
   }, [isLoggedIn, router]);
+
   return (
     <div className="">
       <EditHeader>

@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useRef, useState } from 'react';
 
 import { ErrorMessage } from '@/components/toast';
-import { useWithAuth } from '@/hooks/useWithAuth';
 import { useStore } from '@/store';
 
 import Logo from './logo';
