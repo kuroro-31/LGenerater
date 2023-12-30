@@ -8,7 +8,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import Footer from "@/components/footer";
 import Header from "@/components/header";
@@ -16,12 +16,15 @@ import Header from "@/components/header";
 export default function TopPage() {
   // 未ログインの場合はログインページへ
   const router = useRouter();
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.push("/auth/login");
-    }
-  }, [isLoggedIn, router]);
+    const checkLoginStatus = () => {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (!isLoggedIn) {
+        router.push("/auth/login");
+      }
+    };
+    checkLoginStatus();
+  }, [router]);
 
   return (
     <div className="">

@@ -6,19 +6,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import EditHeader from "@/components/header/edit";
 
 export default function Edit1() {
   // 未ログインの場合はログインページへ
   const router = useRouter();
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.push("/auth/login");
-    }
-  }, [isLoggedIn, router]);
+    const checkLoginStatus = () => {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (!isLoggedIn) {
+        router.push("/auth/login");
+      }
+    };
+    checkLoginStatus();
+  }, [router]);
 
   return (
     <div className="">

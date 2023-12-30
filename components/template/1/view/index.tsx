@@ -5,22 +5,25 @@
 */
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import ViewHeader from "@/components/header/view";
+import ViewHeader from '@/components/header/view';
 
 export default function View1() {
   // 未ログインの場合はログインページへ
   const router = useRouter();
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.push("/auth/login");
-    }
-  }, [isLoggedIn, router]);
+    const checkLoginStatus = () => {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (!isLoggedIn) {
+        router.push("/auth/login");
+      }
+    };
+    checkLoginStatus();
+  }, [router]);
 
   // デスクトップとモバイルの表示切り替え
   const [viewMode, setViewMode] = useState("mobile"); // 初期状態を'mobile'に設定
