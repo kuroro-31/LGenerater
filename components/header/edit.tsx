@@ -32,7 +32,7 @@ const EditHeader = ({ children }: ViewHeaderProps) => {
           </Link>
 
           {/* メニュー */}
-          <div className="flex items-center md:ml-auto">{children}</div>
+          <div className="w-full flex items-center">{children}</div>
         </div>
       </div>
     </header>

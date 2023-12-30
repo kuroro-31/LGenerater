@@ -52,11 +52,11 @@ const Header = () => {
           {/* メニュー */}
           <div className="flex items-center md:ml-auto">
             {isLoggedIn && (
-              <div className="">
-                <button className="btn" onClick={createWebsite}>
+              <div>
+                <button className="btn text-sm" onClick={createWebsite}>
                   LPを作成
                 </button>
-                <button onClick={handleLogout} className="btn-border">
+                <button onClick={handleLogout} className="btn-border text-sm">
                   ログアウト
                 </button>
               </div>
