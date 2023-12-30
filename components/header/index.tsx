@@ -27,9 +27,9 @@ const Header = () => {
   };
 
   const createWebsite = async () => {
-    const response = await axios.post("/api/createWebsite");
+    const response = await axios.post("/api/website/create");
     const website = response.data;
-    router.push(`/edit/${website.id}`);
+    router.push(`/lp/edit/${website.id}`);
   };
 
   return (

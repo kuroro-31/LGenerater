@@ -5,14 +5,14 @@
 */
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import ViewHeader from '@/components/header/view';
+import ViewHeader from "@/components/header/view";
 
-export default function View1() {
+export default function View() {
   // 未ログインの場合はログインページへ
   const router = useRouter();
   useEffect(() => {

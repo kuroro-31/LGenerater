@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 
 import EditHeader from "@/components/header/edit";
 
-export default function Edit1() {
+export default function Edit() {
   // 未ログインの場合はログインページへ
   const router = useRouter();
   useEffect(() => {

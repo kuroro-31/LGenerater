@@ -1,9 +1,10 @@
 /*
 |--------------------------------------------------------------------------
-| ユーザーの型定義
+| Prisma関連の型定義
 |--------------------------------------------------------------------------
 */
-export type User = {
-  id: string;
-  password: string;
-};
+import { PrismaClient } from '@prisma/client';
+
+declare global {
+  var prisma: PrismaClient | undefined;
+}

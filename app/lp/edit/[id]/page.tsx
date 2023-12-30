@@ -1,10 +1,9 @@
-import Edit1 from '@/components/template/1/edit';
+import Edit from "@/components/pages/lp/edit";
 
 export default function template1_edit() {
   return (
     <div className="">
-      テスト
-      <Edit1 />
+      <Edit />
     </div>
   );
 }
