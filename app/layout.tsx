@@ -1,13 +1,8 @@
-/*
-|--------------------------------------------------------------------------
-| 共通コンポーネント
-|--------------------------------------------------------------------------
-*/
 import "./globals.scss";
 
-import { Inter } from "next/font/google";
+import { Noto_Sans_JP } from "next/font/google";
 
-const inter = Inter({ subsets: ["latin"] });
+const notoSansJP = Noto_Sans_JP({ subsets: ["vietnamese"] });
 
 export default function RootLayout({
   children,
@@ -15,8 +10,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html lang="ja">
+      <body className={notoSansJP.className}>{children}</body>
     </html>
   );
 }
