@@ -5,12 +5,12 @@
 */
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import ViewHeader from '@/components/header/view';
+import ViewHeader from "@/components/header/view";
 
 export default function View({ id }) {
   // 未ログインの場合はログインページへ
@@ -100,7 +100,7 @@ export default function View({ id }) {
       </ViewHeader>
 
       {/* メインコンテンツ */}
-      <div className="w-full min-h-screen bg-[#eee] mt-[89px]">
+      <div className="w-full min-h-screen bg-[#EFF0F3] mt-[89px]">
         {/* デスクトップ */}
         {viewMode === "desktop" && (
           <div className="desktop-prev">

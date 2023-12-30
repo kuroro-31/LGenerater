@@ -3,7 +3,7 @@
 | 新しくウェブサイトを作成する
 |--------------------------------------------------------------------------
 */
-import prisma from '../../../lib/prisma';
+import prisma from "../../../lib/prisma";
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
@@ -14,7 +14,7 @@ export default async function handle(
   const website = await prisma.website.create({
     data: {
       // ここにWebsiteの初期データを設定します
-      title: "新しいウェブサイト",
+      title: "新しいLP",
     },
   });
 

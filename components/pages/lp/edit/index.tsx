@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import EditHeader from "@/components/header/edit";
+import { Website } from "@/types/website";
 
 export default function Edit({ id }) {
   const router = useRouter();
@@ -41,6 +42,16 @@ export default function Edit({ id }) {
       console.error("削除に失敗しました");
     }
   };
+
+  // IDからウェブサイトを取得する
+  const [website, setWebsite] = useState<Website | null>(null); // ウェブサイトの型を指定
+  useEffect(() => {
+    if (id) {
+      fetch(`/api/website/${id}`)
+        .then((response) => response.json())
+        .then((data: Website) => setWebsite(data)); // 取得したデータがウェブサイトの型であることを指定
+    }
+  }, [id]);
 
   return (
     <div className="relative">
@@ -151,6 +162,18 @@ export default function Edit({ id }) {
           </button>
         </div>
       </EditHeader>
+
+      <div className="bg-white h-50 w-full border-b px-4 py-2 flex items-center">
+        {/* LPタイトル */}
+        <input
+          type="text"
+          value={website?.title || ""}
+          placeholder="LPのタイトル"
+          className="text-[13px] font-bold outline-none"
+        />
+      </div>
+
+      <div className="min-h-screen"></div>
     </div>
   );
 }

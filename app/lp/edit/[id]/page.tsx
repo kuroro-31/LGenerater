@@ -9,7 +9,7 @@ export default function EditPage() {
   const id = params ? (params["id"] as string) : undefined;
 
   return (
-    <div className="">
+    <div className="bg-[#EFF0F3]">
       <Edit id={id} />
     </div>
   );
