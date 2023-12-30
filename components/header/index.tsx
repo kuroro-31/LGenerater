@@ -7,15 +7,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { useStore } from "@/store";
 
 const Header = () => {
-  const { isLoggedIn, setLoggedIn } = useStore();
+  const router = useRouter();
+
+  const { setLoggedIn } = useStore();
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   const handleLogout = () => {
     setLoggedIn(false);
     localStorage.removeItem("isLoggedIn");
+    router.push("/auth/login");
   };
 
   return (
@@ -38,9 +43,14 @@ const Header = () => {
           {/* メニュー */}
           <div className="flex items-center md:ml-auto">
             {isLoggedIn && (
-              <button onClick={handleLogout} className="btn-border">
-                ログアウト
-              </button>
+              <div className="">
+                <Link href="/campaign/jp/1" className="btn">
+                  LPを作成
+                </Link>
+                <button onClick={handleLogout} className="btn-border">
+                  ログアウト
+                </button>
+              </div>
             )}
           </div>
         </div>

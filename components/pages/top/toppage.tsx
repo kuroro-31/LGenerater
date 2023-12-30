@@ -12,12 +12,11 @@ import { useEffect } from "react";
 
 import Footer from "@/components/footer";
 import Header from "@/components/header";
-import { useStore } from "@/store";
 
 export default function TopPage() {
   // 未ログインの場合はログインページへ
   const router = useRouter();
-  const { isLoggedIn } = useStore();
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/auth/login");
@@ -28,19 +27,12 @@ export default function TopPage() {
     <div className="">
       <Header />
 
-      <h2 className="container mx-auto text-xl py-8 border-b">
-        LPテンプレートを選択してください
-      </h2>
-
       <div className="w-full bg-[#f8f8f8]">
         <div className="container mx-auto flex min-h-screen flex-col py-8">
           <div className="">
             <div className="">
               <div className="mb-8 flex items-center">
-                <h3 className="text-lg mr-8">すべてのテンプレート</h3>
-                {/* <Link href="/campaign/jp/1" className="btn">
-                  追加する
-                </Link> */}
+                <h3 className="text-lg">すべてのLP</h3>
               </div>
               <div className="flex flex-wrap justify-between">
                 <div className="w-1/3 mb-8">

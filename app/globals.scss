@@ -73,6 +73,10 @@
   &-border {
     @apply text-[#18181b] bg-[#f4f4f5] bg-opacity-[15%] hover:bg-opacity-[25%] rounded-[12.8px] py-2 px-6 transition-all;
   }
+
+  &-round {
+    @apply text-white bg-primary hover:brightness-110 rounded-full py-2 px-6 transition-all;
+  }
 }
 
 /*
