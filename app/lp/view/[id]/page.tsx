@@ -1,9 +1,16 @@
-import View from "@/components/pages/lp/view";
+"use client"
 
-export default function template1_view() {
+import { useParams } from 'next/navigation';
+
+import View from '@/components/pages/lp/view';
+
+export default function ViewPage() {
+  const params = useParams();
+  const id = params ? (params["id"] as string) : undefined;
+
   return (
     <div className="">
-      <View />
+      <View id={id} />
     </div>
   );
 }

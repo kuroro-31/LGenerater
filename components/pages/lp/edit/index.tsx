@@ -1,32 +1,27 @@
-/*
-|--------------------------------------------------------------------------
-| テンプレート１ 編集画面
-|--------------------------------------------------------------------------
-*/
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 import EditHeader from "@/components/header/edit";
 
-export default function Edit() {
-  // 未ログインの場合はログインページへ
+export default function Edit({ id }) {
   const router = useRouter();
-  useEffect(() => {
-    const checkLoginStatus = () => {
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-      if (!isLoggedIn) {
-        router.push("/auth/login");
-      }
-    };
-    checkLoginStatus();
-  }, [router]);
+
+  // 未ログインの場合はログインページへ
+  const isLoggedIn =
+    typeof window !== "undefined" ? localStorage.getItem("isLoggedIn") : null;
+  if (!isLoggedIn) {
+    router.push("/auth/login");
+  }
 
   return (
-    <div className="">
+    <div>
       <EditHeader>
-        <button className="bg-primary text-white px-6 py-2 rounded-full text-sm">
+        <Link href={`/lp/view/${id}`} className="text-sm">
+          プレビュー
+        </Link>
+        <button className="ml-4 bg-primary text-white px-4 py-2 rounded-full text-[13px]">
           ダウンロード
         </button>
       </EditHeader>

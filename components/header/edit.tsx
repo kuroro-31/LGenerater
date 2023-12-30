@@ -16,7 +16,7 @@ interface ViewHeaderProps {
 const EditHeader = ({ children }: ViewHeaderProps) => {
   return (
     <header className="w-full flex-none border-b border-comiee">
-      <div className="py-4 lg:px-4 lg:border-0 mx-4 lg:mx-0">
+      <div className="py-1.5 lg:px-4 lg:border-0 mx-4 lg:mx-0">
         <div className="relative flex items-center">
           {/* ロゴ */}
           <Link

@@ -1,18 +1,18 @@
 /*
 |--------------------------------------------------------------------------
-| テンプレート１ 表示画面
+| LP プレビュー画面
 |--------------------------------------------------------------------------
 */
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import ViewHeader from "@/components/header/view";
+import ViewHeader from '@/components/header/view';
 
-export default function View() {
+export default function View({ id }) {
   // 未ログインの場合はログインページへ
   const router = useRouter();
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function View() {
   }, []);
 
   return (
-    <div className="">
+    <div>
       {/* ヘッダー */}
       <ViewHeader>
         <div className="flex items-center ml-auto mr-16">
@@ -91,7 +91,7 @@ export default function View() {
         </div>
 
         <Link
-          href="/template/1/edit"
+          href={`/lp/edit/${id}`}
           passHref
           className="bg-primary text-white rounded-full px-6 py-2"
         >

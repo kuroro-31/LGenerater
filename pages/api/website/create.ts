@@ -1,4 +1,9 @@
-import prisma from "../../../lib/prisma";
+/*
+|--------------------------------------------------------------------------
+| 新しくウェブサイトを作成する
+|--------------------------------------------------------------------------
+*/
+import prisma from '../../../lib/prisma';
 
 import type { NextApiRequest, NextApiResponse } from "next";
 

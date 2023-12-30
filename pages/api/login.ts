@@ -1,5 +1,10 @@
-// pages/api/login.ts
-import { PrismaClient } from "@prisma/client";
+/*
+|--------------------------------------------------------------------------
+|ログイン時にユーザーIDとパスワードを受け取り
+|ユーザーIDとパスワードが一致するユーザーが存在するかを確認する
+--------------------------------------------------------------------------
+*/
+import { PrismaClient } from '@prisma/client';
 
 import type { NextApiRequest, NextApiResponse } from "next";
 
