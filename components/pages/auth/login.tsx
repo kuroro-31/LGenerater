@@ -5,39 +5,29 @@
 */
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useEffect, useRef, useState } from 'react';
 
-import { ErrorMessage } from "@/components/toast";
-import { useWithAuth } from "@/hooks/useWithAuth";
-import { useStore } from "@/store";
-import { users } from "@/types/userRoles";
+import { ErrorMessage } from '@/components/toast';
+import { useWithAuth } from '@/hooks/useWithAuth';
+import { useStore } from '@/store';
 
-import Logo from "./logo";
+import Logo from './logo';
 
 // ログイン
 const Login = () => {
   const router = useRouter();
-
-  // すでにログインしてたらトップページへ
-  const isLoggedIn = useWithAuth();
-  useEffect(() => {
-    if (isLoggedIn) {
-      router.push("/");
-    }
-  }, [isLoggedIn, router]);
-
-  const { setLoggedIn, setUserId } = useStore();
+  const { setLoggedIn, setUserEmail } = useStore();
 
   const [loading, setLoading] = useState(false);
   const [progressDisplay, setProgressDisplay] = useState("none");
   const [overlayVisible, setOverlayVisible] = useState(true);
   const [buttonClass, setButtonClass] = useState("");
 
-  const userIdRef = useRef<HTMLInputElement>(null);
-  const [userIdValue, setUserIdValue] = useState("");
-  const [userIdFocused, setUserIdFocused] = useState(false);
+  const userEmailRef = useRef<HTMLInputElement>(null);
+  const [userEmailValue, setUserEmailValue] = useState("");
+  const [userEmailFocused, setUserEmailFocused] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
   const [passwordValue, setPasswordValue] = useState("");
   const [passwordFocused, setPasswordFocused] = useState(false);
@@ -62,22 +52,35 @@ const Login = () => {
     setLoading(true);
 
     // ログイン処理
-    const user = users.find(
-      (user) =>
-        user.id === userIdRef.current!.value &&
-        user.password === passwordRef.current!.value
-    );
-    if (user) {
-      // ログイン成功
-      setLoggedIn(true);
-      setUserId(user.id); // <-- Save the user's ID in the store
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userId", user.id); // <-- Save the user's ID
-      localStorage.setItem("userRole", user.role); // <-- Save the user's role
-      router.push("/");
+    const response = await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: userEmailRef.current!.value,
+        password: passwordRef.current!.value,
+      }),
+    });
+
+    console.log(response);
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.userEmail) {
+        // ログイン成功
+        setLoggedIn(true);
+        setUserEmail(data.userEmail.toString()); // <-- Save the user's ID in the store
+        // ログイン状態をlocalStorageに保存
+        localStorage.setItem("isLoggedIn", "true");
+        router.push("/");
+      } else {
+        // userEmailが存在しない場合のエラーハンドリング
+        console.error("userEmail is missing in the response");
+      }
     } else {
       // ログイン失敗
-      setErrorMessage("ユーザーIDまたはパスワードが間違っています");
+      setErrorMessage("メールアドレスまたはパスワードが間違っています");
     }
 
     // setLoading(false)の呼び出しを一定時間遅延させる
@@ -138,26 +141,26 @@ const Login = () => {
               {/* Email input */}
               <div className="relative mb-4">
                 <input
-                  ref={userIdRef}
-                  id="userId"
-                  type="text"
-                  name="userId"
+                  ref={userEmailRef}
+                  id="userEmail"
+                  type="email"
+                  name="userEmail"
                   className={`input-field w-full p-4 rounded bg-white border-2 focus:border-primary transition-all ${
-                    userIdValue && "has-value"
+                    userEmailValue && "has-value"
                   }`}
                   required
-                  value={userIdValue}
-                  onChange={(e) => setUserIdValue(e.target.value)}
-                  onFocus={() => setUserIdFocused(true)}
-                  onBlur={() => setUserIdFocused(false)}
+                  value={userEmailValue}
+                  onChange={(e) => setUserEmailValue(e.target.value)}
+                  onFocus={() => setUserEmailFocused(true)}
+                  onBlur={() => setUserEmailFocused(false)}
                 />
                 <label
-                  htmlFor="userId"
+                  htmlFor="userEmail"
                   className={`label absolute top-[5px] left-[10px] text-gray-500 transition-all duration-200 dark:text-f5 ${
-                    userIdValue || userIdFocused ? "label-focused" : ""
+                    userEmailValue || userEmailFocused ? "label-focused" : ""
                   }`}
                 >
-                  User ID
+                  Email
                 </label>
                 <div className="border-wrapper absolute top-0 left-0 w-full h-full rounded pointer-events-none"></div>
               </div>

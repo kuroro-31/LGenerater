@@ -3,28 +3,15 @@
 | 認証状態の管理
 |--------------------------------------------------------------------------
 */
-import { useEffect } from 'react';
-
-import { useStore } from '@/store';
-import { User, users } from '@/types/userRoles';
+import { useEffect, useState } from "react";
 
 export const useWithAuth = () => {
-  const { isLoggedIn, setLoggedIn, setReady, setUserRole, setUserId } =
-    useStore();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const value = localStorage.getItem("isLoggedIn") === "true";
-    setLoggedIn(value);
-    if (value) {
-      const userId = localStorage.getItem("userId");
-      const user = users.find((user: User) => user.id === userId);
-      if (user) {
-        setUserRole(user.role);
-        setUserId(userId);
-      }
-    }
-    setReady(true);
-  }, [setLoggedIn, setReady, setUserRole, setUserId]);
+    const loggedIn = localStorage.getItem("isLoggedIn");
+    setIsLoggedIn(loggedIn === "true");
+  }, []);
 
   return isLoggedIn;
 };

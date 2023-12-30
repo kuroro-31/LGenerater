@@ -5,20 +5,19 @@
 */
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-import Footer from '@/components/footer';
-import Header from '@/components/header';
-import { useWithAuth } from '@/hooks/useWithAuth';
+import Footer from "@/components/footer";
+import Header from "@/components/header";
+import { useStore } from "@/store";
 
 export default function TopPage() {
+  // 未ログインの場合はログインページへ
   const router = useRouter();
-
-  // すでにログインしてたらトップページへ
-  const isLoggedIn = useWithAuth();
+  const { isLoggedIn } = useStore();
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/auth/login");
