@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import React, { useEffect, useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { Website } from '@/types/website';
-import { WebsiteElement } from '@/types/websiteElement';
+import { Website } from "@/types/website";
+import { WebsiteElement } from "@/types/websiteElement";
 
 // ドラッグ可能なコンポーネント
-import DraggableComponent from './DraggableComponent';
+import DraggableComponent from "./DraggableComponent";
 // ドロップ可能なエリア
-import DropArea from './DropArea';
+import DropArea from "./DropArea";
 
 interface EditorProps {
   website: Website;
@@ -23,6 +23,31 @@ export default function Editor({ website }: EditorProps) {
     console.log(item); // ドロップされたアイテムをログに出力
     setComponents([...components, item]);
   };
+
+  // ページがロードされたとき、またはwebsite.htmlが更新されたときにHTMLを解析してcomponentsステートを初期化
+  useEffect(() => {
+    const initializeComponents = async () => {
+      const html = website.html;
+
+      // HTMLを解析
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      // HTML要素をWebsiteElementに変換
+      const elements = Array.from(doc.body.children).map((element) => {
+        return {
+          type: element.tagName.toLowerCase(),
+          // ここでは簡単のため、全ての要素の内容を"ここにテキスト"とします
+          content: "ここにテキスト",
+        };
+      });
+
+      // componentsステートを初期化
+      setComponents(elements);
+    };
+
+    initializeComponents();
+  }, [website.html]);
 
   // componentsが更新されたときにHTMLを生成し、サーバーに送信する
   useEffect(() => {
