@@ -6,4 +6,5 @@
 export type Website = {
   id: number;
   title: string;
+  html: string;
 };

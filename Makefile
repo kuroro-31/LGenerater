@@ -22,7 +22,7 @@ d-up:
 d-up-d:
 	docker-compose up -d
 d-build:
-	docker-compose build --no-cache
+	@make d-clean && docker-compose build --no-cache
 d-down:
 	docker-compose down
 d-clean:
@@ -31,9 +31,9 @@ d-stats:
 	docker stats
 d-exec:
 	docker-compose exec app bash
-pri-migrate:
+migrate:
 	npx prisma migrate dev && npx prisma generate
-pri-s:
+studio:
 	npx prisma studio
 pri-seed:
 	npx prisma db seed
