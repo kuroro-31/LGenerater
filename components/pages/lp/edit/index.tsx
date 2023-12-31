@@ -112,7 +112,30 @@ export default function Edit({ id }) {
       )}
 
       <EditHeader>
-        <div className="ml-8">
+        <div className="ml-6">
+          {/* LPタイトル */}
+          <input
+            type="text"
+            value={inputValue} // 入力値を保持するステートを使用
+            onCompositionStart={() => setIsComposing(true)}
+            onCompositionEnd={(e) => {
+              setIsComposing(false);
+              updateWebsiteTitle(e.target.value);
+            }}
+            onChange={(e) => {
+              setInputValue(e.target.value); // 入力が変更されたときに入力値を保持するステートを更新
+              if (!isComposing) {
+                updateWebsiteTitle(e.target.value);
+              }
+            }}
+            placeholder="読み込み中..."
+            className="font-bold border border-white hover:border-[#ccc] rounded py-1.5 px-3"
+          />
+
+          {saving && <div className="">保存しています...</div>}
+          {saved && <div className="">保存しました</div>}
+        </div>
+        <div className="ml-auto flex items-center">
           {/* サイトメニュー */}
           <div className="relative">
             {/* タイトル */}
@@ -129,21 +152,12 @@ export default function Edit({ id }) {
               onMouseLeave={() => setIsHovered(false)}
               className={`${
                 isHovered ? "block" : "hidden"
-              } absolute top-0 left-0 bg-white z-50 rounded-lg shadow-lg p-6 transition-all`}
+              } absolute top-0 left-[-150px] bg-white z-50 rounded-lg shadow-lg p-6 transition-all`}
             >
               {/* 子メニュー */}
               <div className="flex">
                 {/* タイトル */}
                 <div className="w-1/2 pr-8">
-                  <Link
-                    href={`/lp/view/${id}`}
-                    onMouseEnter={() => setHoveredMenuId(1)}
-                    onMouseLeave={() => setHoveredMenuId(null)}
-                    className="block whitespace-nowrap text-sm cursor-pointer hover:text-primary py-1.5"
-                  >
-                    プレビュー
-                  </Link>
-
                   {/* 削除 */}
                   <button
                     onMouseEnter={() => setHoveredMenuId(2)}
@@ -165,12 +179,6 @@ export default function Edit({ id }) {
                 </div>
                 {/* 本文 */}
                 <div className="w-1/2 bg-[#e7f0ffcc] min-w-[150px] min-h-[200px] rounded-md p-4">
-                  <div className={hoveredMenuId === 1 ? "" : "hidden"}>
-                    <h3 className="text-sm mb-2">LPのプレビューを表示</h3>
-                    <p className="text-[13px] font-thin">
-                      サイトをテスト表示します。サイトを公開する前にデザインと機能をチェックしましょう。
-                    </p>
-                  </div>
                   <div className={hoveredMenuId === 2 ? "" : "hidden"}>
                     <h3 className="text-sm mb-2">
                       サイトをサービス上から削除します
@@ -189,9 +197,10 @@ export default function Edit({ id }) {
               </div>
             </div>
           </div>
-        </div>
-        <div className="ml-auto">
-          <Link href={`/lp/view/${id}`} className="text-sm">
+          <Link
+            href={`/lp/view/${id}`}
+            className="inline-block ml-6 text-[13px]"
+          >
             プレビュー
           </Link>
           <button className="ml-6 bg-primary text-white px-4 py-2 rounded-full text-[13px]">
@@ -199,30 +208,6 @@ export default function Edit({ id }) {
           </button>
         </div>
       </EditHeader>
-
-      <div className="bg-white h-50 w-full border-b px-4 py-2 flex items-center">
-        {/* LPタイトル */}
-        <input
-          type="text"
-          value={inputValue} // 入力値を保持するステートを使用
-          onCompositionStart={() => setIsComposing(true)}
-          onCompositionEnd={(e) => {
-            setIsComposing(false);
-            updateWebsiteTitle(e.target.value);
-          }}
-          onChange={(e) => {
-            setInputValue(e.target.value); // 入力が変更されたときに入力値を保持するステートを更新
-            if (!isComposing) {
-              updateWebsiteTitle(e.target.value);
-            }
-          }}
-          placeholder="LPのタイトル"
-          className="text-[13px] font-bold border rounded p-2 text-lg"
-        />
-
-        {saving && <div className="">保存しています...</div>}
-        {saved && <div className="">保存しました</div>}
-      </div>
 
       {/* エディタ */}
       <div className="min-h-screen">

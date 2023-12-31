@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import React, { useEffect, useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import { Website } from "@/types/website";
-import { WebsiteElement } from "@/types/websiteElement";
+import { Website } from '@/types/website';
+import { WebsiteElement } from '@/types/websiteElement';
 
 // ドラッグ可能なコンポーネント
-import DraggableComponent from "./DraggableComponent";
+import DraggableComponent from './DraggableComponent';
 // ドロップ可能なエリア
-import DropArea from "./DropArea";
+import DropArea from './DropArea';
 
 interface EditorProps {
   website: Website;
@@ -83,7 +83,7 @@ export default function Editor({ website }: EditorProps) {
         </div>
 
         {/* キャンバス（ドロップ可能エリア） */}
-        <div className="canvas w-4/5 min-h-[500px] bg-white">
+        <div className="canvas w-4/5 min-h-[500px] mt-8">
           <DropArea onDrop={handleDrop}>
             {/* ドロップ要素を表示 */}
             {components.map((component, index) => {

@@ -20,7 +20,7 @@ export default function DropArea({ onDrop, children }: DropAreaProps) {
     <div
       ref={drop}
       style={{ backgroundColor: isOver ? "lightgray" : "white" }}
-      className="canvas-content w-full h-full"
+      className="canvas-content w-full h-full max-w-[870px] shadow-lg rounded"
     >
       {children}
     </div>
