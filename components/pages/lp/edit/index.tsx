@@ -7,6 +7,8 @@ import { useEffect, useState } from "react";
 import EditHeader from "@/components/header/edit";
 import { Website } from "@/types/website";
 
+import Editor from "./editor";
+
 export default function Edit({ id }) {
   const router = useRouter();
 
@@ -223,7 +225,9 @@ export default function Edit({ id }) {
       </div>
 
       {/* エディタ */}
-      <div className="min-h-screen"></div>
+      <div className="min-h-screen">
+        {website && <Editor website={website} />}
+      </div>
     </div>
   );
 }
