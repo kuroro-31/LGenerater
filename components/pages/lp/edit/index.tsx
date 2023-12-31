@@ -1,11 +1,11 @@
 "use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import EditHeader from '@/components/header/edit';
-import { Website } from '@/types/website';
+import EditHeader from "@/components/header/edit";
+import { Website } from "@/types/website";
 
 export default function Edit({ id }) {
   const router = useRouter();
@@ -222,6 +222,7 @@ export default function Edit({ id }) {
         {saved && <div className="">保存しました</div>}
       </div>
 
+      {/* エディタ */}
       <div className="min-h-screen"></div>
     </div>
   );
