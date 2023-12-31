@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import EditHeader from "@/components/header/edit";
-import { Website } from "@/types/website";
+import EditHeader from '@/components/header/edit';
+import { Website } from '@/types/website';
 
 export default function Edit({ id }) {
   const router = useRouter();
@@ -49,9 +49,44 @@ export default function Edit({ id }) {
     if (id) {
       fetch(`/api/website/${id}`)
         .then((response) => response.json())
-        .then((data: Website) => setWebsite(data)); // 取得したデータがウェブサイトの型であることを指定
+        .then((data: Website) => {
+          setWebsite(data); // 取得したデータがウェブサイトの型であることを指定
+          setInputValue(data.title); // 取得したウェブサイトのタイトルを入力値に設定
+        });
     }
   }, [id]);
+
+  // IDからウェブサイトを更新する
+  // IMEの入力セッションが終了したときにのみupdateWebsiteTitleを呼び出す
+  const [isComposing, setIsComposing] = useState(false);
+  const [inputValue, setInputValue] = useState(""); // 入力値を保持するステートを追加
+
+  // 保存の状態を管理するステート
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  // IDからウェブサイトを更新する
+  const updateWebsiteTitle = async (newTitle: string) => {
+    setSaving(true); // 保存を開始
+    const response = await fetch(`/api/website/update/${id}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title: newTitle }),
+    });
+
+    if (response.ok) {
+      setWebsite((prevWebsite) =>
+        prevWebsite ? { ...prevWebsite, title: newTitle } : null
+      );
+      setSaved(true); // 保存が完了
+      setTimeout(() => setSaved(false), 2000); // 2秒後にメッセージを消す
+    } else {
+      console.error("更新に失敗しました");
+    }
+    setSaving(false); // 保存を終了
+  };
 
   return (
     <div className="relative">
@@ -167,10 +202,24 @@ export default function Edit({ id }) {
         {/* LPタイトル */}
         <input
           type="text"
-          value={website?.title || ""}
+          value={inputValue} // 入力値を保持するステートを使用
+          onCompositionStart={() => setIsComposing(true)}
+          onCompositionEnd={(e) => {
+            setIsComposing(false);
+            updateWebsiteTitle(e.target.value);
+          }}
+          onChange={(e) => {
+            setInputValue(e.target.value); // 入力が変更されたときに入力値を保持するステートを更新
+            if (!isComposing) {
+              updateWebsiteTitle(e.target.value);
+            }
+          }}
           placeholder="LPのタイトル"
-          className="text-[13px] font-bold outline-none"
+          className="text-[13px] font-bold border rounded p-2 text-lg"
         />
+
+        {saving && <div className="">保存しています...</div>}
+        {saved && <div className="">保存しました</div>}
       </div>
 
       <div className="min-h-screen"></div>
