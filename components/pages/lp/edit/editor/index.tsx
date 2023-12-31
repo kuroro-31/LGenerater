@@ -1,21 +1,17 @@
-import { useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import React, { useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import { Website } from "@/types/website";
-import { WebsiteElement } from "@/types/websiteElement";
+import { Website } from '@/types/website';
+import { WebsiteElement } from '@/types/websiteElement';
 
 // ドラッグ可能なコンポーネント
-import DraggableComponent from "./DraggableComponent";
+import DraggableComponent from './DraggableComponent';
 // ドロップ可能なエリア
-import DropArea from "./DropArea";
+import DropArea from './DropArea';
 
 interface EditorProps {
   website: Website;
-}
-interface Item {
-  type: string;
-  // 他のプロパティ...
 }
 
 export default function Editor({ website }: EditorProps) {
@@ -23,25 +19,44 @@ export default function Editor({ website }: EditorProps) {
   const [components, setComponents] = useState<WebsiteElement[]>([]);
 
   // 要素がドロップされたときの処理
-  const handleDrop = (item: Item) => {
+  const handleDrop = (item: WebsiteElement) => {
+    console.log(item); // ドロップされたアイテムをログに出力
     setComponents([...components, item]);
   };
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="editor">
-        {/* ドラッグ可能なコンポーネント */}
-        <DraggableComponent type="h1" />
-        <DraggableComponent type="p" />
-        <DraggableComponent type="img" />
+      <div className="editor flex">
+        {/* ドラッグコンポーネント */}
+        <div className="draggable-components w-1/5 p-4 rounded">
+          <DraggableComponent type="h1" />
+          <DraggableComponent type="p" />
+          <DraggableComponent type="img" />
+        </div>
 
-        {/* ドロップ可能なエリア */}
-        <DropArea onDrop={handleDrop}>
-          {/* ドロップされた要素を表示 */}
-          {components.map((component, index) => (
-            <div key={index}>{component.type}</div>
-          ))}
-        </DropArea>
+        {/* キャンバス（ドロップ可能エリア） */}
+        <div className="canvas w-4/5 min-h-[500px] bg-white">
+          <DropArea onDrop={handleDrop}>
+            {/* ドロップ要素を表示 */}
+            {components.map((component, index) => {
+              // typeに基づいて適切な要素を作成
+              let Element;
+              if (component.type === "img") {
+                Element = React.createElement(component.type, {
+                  key: index,
+                  src: "/noimage.png",
+                });
+              } else {
+                Element = React.createElement(
+                  component.type,
+                  { key: index },
+                  "ここにテキスト"
+                );
+              }
+              return Element;
+            })}
+          </DropArea>
+        </div>
       </div>
     </DndProvider>
   );
