@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import EditHeader from "@/components/header/edit";
+import Loading from "@/components/loading";
 import { Website } from "@/types/website";
 
 import Editor from "./editor";
@@ -47,13 +48,16 @@ export default function Edit({ id }) {
 
   // IDからウェブサイトを取得する
   const [website, setWebsite] = useState<Website | null>(null); // ウェブサイトの型を指定
+  const [loading, setLoading] = useState(false); // loadingフラグを追加
   useEffect(() => {
+    setLoading(true); // データ取得前にloadingをtrueに
     if (id) {
       fetch(`/api/website/${id}`)
         .then((response) => response.json())
         .then((data: Website) => {
           setWebsite(data); // 取得したデータがウェブサイトの型であることを指定
           setInputValue(data.title); // 取得したウェブサイトのタイトルを入力値に設定
+          setLoading(false); // データ取得後にloadingをfalseに
         });
     }
   }, [id]);
@@ -219,7 +223,13 @@ export default function Edit({ id }) {
 
       {/* エディタ */}
       <div className="min-h-screen">
-        {website && <Editor website={website} />}
+        {loading ? (
+          <div className="w-full h-[500px] flex items-center justify-center">
+            <Loading />
+          </div>
+        ) : (
+          website && <Editor website={website} />
+        )}
       </div>
     </div>
   );
