@@ -32,23 +32,19 @@ export default function View({ id }) {
   const [htmlContent, setHtmlContent] = useState("");
   useEffect(() => {
     async function fetchHtml() {
-      const path = "components/template/1/code/campaign/jp/index.html";
-      const encodedPath = encodeURIComponent(path);
-      // console.log(`Encoded path: ${encodedPath}`); // この行を追加
-      const url = `/api/loadHtml?path=${encodedPath}`;
-      // console.log(`Fetching HTML from: ${url}`); // デバッグ追加
+      const url = `/api/website/${id}`; // URLを変更
 
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        setHtmlContent(data.htmlContent);
+        setHtmlContent(data.html); // レスポンスのプロパティを変更
       } else {
         console.error("Failed to fetch HTML content");
-        console.error(`Response status: ${res.status}`); // デバッグ追加
+        console.error(`Response status: ${res.status}`);
       }
     }
     fetchHtml();
-  }, []);
+  }, [id]); // 依存配列にidを追加
 
   return (
     <div>
@@ -101,12 +97,18 @@ export default function View({ id }) {
       </ViewHeader>
 
       {/* メインコンテンツ */}
-      <div className="w-full min-h-screen bg-[#EFF0F3] mt-[89px]">
+      <div
+        className={`w-full min-h-screen mt-[89px] ${
+          htmlContent ? "" : "bg-[#EFF0F3]"
+        }`}
+      >
         {/* デスクトップ */}
         {viewMode === "desktop" && (
           <div className="desktop-prev">
             <div
-              className="desktop-prev__body"
+              className={`desktop-prev__body ${
+                htmlContent ? "" : "bg-[#c2c7cb]"
+              }`}
               dangerouslySetInnerHTML={{ __html: htmlContent }}
             ></div>
           </div>
@@ -116,7 +118,9 @@ export default function View({ id }) {
           <div className="p-8">
             <div className="mobile-prev mx-auto">
               <div
-                className="mobile-prev__body"
+                className={`mobile-prev__body ${
+                  htmlContent ? "" : "bg-[#c2c7cb]"
+                }`}
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               ></div>
             </div>

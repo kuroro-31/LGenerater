@@ -174,8 +174,7 @@ body {
   @apply relative h-[690px] w-[320px];
 }
 
-.mobile-prev:after,
-.mobile-prev:before {
+.mobile-prev:after {
   background: #fff;
   box-shadow: -15px 8px 20px -10px rgba(0, 0, 0, 0.2);
   content: "";
@@ -183,21 +182,31 @@ body {
   height: 62px;
   width: 100%;
 }
+
 .mobile-prev:before {
+  background: #fff;
+  content: "";
+  display: inline-block;
+  height: 62px;
+  width: 100%;
+}
+
+.mobile-prev:before {
+  @apply border-2;
   border-radius: 46px 46px 0 0;
-  margin-bottom: -3px;
+  margin-bottom: -5px;
 }
 
 .mobile-prev:after {
+  @apply border-2;
   border-radius: 0 0 46px 46px;
-  margin-top: -3px;
 }
 
 .mobile-prev__body {
-  @apply bg-[#c2c7cb] h-[566px] max-h-[566px] w-[320px] overflow-y-auto;
+  @apply h-[566px] max-h-[566px] w-[320px] overflow-y-auto border-x-2;
   box-shadow: -15px 8px 20px -10px rgba(0, 0, 0, 0.2);
 }
 
 .desktop-prev__body {
-  @apply bg-[#c2c7cb] min-h-screen;
+  @apply min-h-screen;
 }
