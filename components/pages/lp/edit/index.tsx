@@ -94,6 +94,16 @@ export default function Edit({ id }) {
     setSaving(false); // 保存を終了
   };
 
+  // ダウンロード機能
+  const handleDownload = () => {
+    const element = document.createElement("a");
+    const file = new Blob([website?.html || ""], { type: "text/html" });
+    element.href = URL.createObjectURL(file);
+    element.download = `${website?.title || "website"}.html`;
+    document.body.appendChild(element);
+    element.click();
+  };
+
   return (
     <div className="relative">
       {isModalOpen && (
@@ -215,7 +225,10 @@ export default function Edit({ id }) {
           >
             プレビュー
           </Link>
-          <button className="ml-6 bg-primary text-white px-4 py-2 rounded-full text-[13px]">
+          <button
+            onClick={handleDownload}
+            className="ml-6 bg-primary text-white px-4 py-2 rounded-full text-[13px]"
+          >
             ダウンロード
           </button>
         </div>
