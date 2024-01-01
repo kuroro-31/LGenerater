@@ -113,27 +113,35 @@ export default function Edit({ id }) {
 
       <EditHeader>
         <div className="ml-6">
-          {/* LPタイトル */}
-          <input
-            type="text"
-            value={inputValue} // 入力値を保持するステートを使用
-            onCompositionStart={() => setIsComposing(true)}
-            onCompositionEnd={(e) => {
-              setIsComposing(false);
-              updateWebsiteTitle(e.target.value);
-            }}
-            onChange={(e) => {
-              setInputValue(e.target.value); // 入力が変更されたときに入力値を保持するステートを更新
-              if (!isComposing) {
+          <div className="flex items-center">
+            {/* LPタイトル */}
+            <input
+              type="text"
+              value={inputValue} // 入力値を保持するステートを使用
+              onCompositionStart={() => setIsComposing(true)}
+              onCompositionEnd={(e) => {
+                setIsComposing(false);
                 updateWebsiteTitle(e.target.value);
-              }
-            }}
-            placeholder="読み込み中..."
-            className="font-bold border border-white hover:border-[#ccc] rounded py-1.5 px-3"
-          />
+              }}
+              onChange={(e) => {
+                setInputValue(e.target.value); // 入力が変更されたときに入力値を保持するステートを更新
+                if (!isComposing) {
+                  updateWebsiteTitle(e.target.value);
+                }
+              }}
+              placeholder="読み込み中..."
+              className="font-bold border border-white hover:border-[#ccc] rounded py-1.5 px-3"
+            />
 
-          {saving && <div className="">保存しています...</div>}
-          {saved && <div className="">保存しました</div>}
+            {saving && (
+              <div className="ml-4 text-xs text-gray-500">
+                保存しています...
+              </div>
+            )}
+            {saved && (
+              <div className="ml-4 text-xs text-gray-500">保存しました</div>
+            )}
+          </div>
         </div>
         <div className="ml-auto flex items-center">
           {/* サイトメニュー */}

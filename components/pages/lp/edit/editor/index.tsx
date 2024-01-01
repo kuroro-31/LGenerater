@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import React, { useEffect, useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { Website } from '@/types/website';
-import { WebsiteElement } from '@/types/websiteElement';
+import { Website } from "@/types/website";
+import { WebsiteElement } from "@/types/websiteElement";
 
 // ドラッグ可能なコンポーネント
-import DraggableComponent from './DraggableComponent';
+import DraggableComponent from "./DraggableComponent";
 // ドロップ可能なエリア
-import DropArea from './DropArea';
+import DropArea from "./DropArea";
 
 interface EditorProps {
   website: Website;
@@ -20,7 +20,7 @@ export default function Editor({ website }: EditorProps) {
 
   // 要素がドロップされたときの処理
   const handleDrop = (item: WebsiteElement) => {
-    console.log(item); // ドロップされたアイテムをログに出力
+    // console.log("ドロップされたアイテム：" + item); // ドロップされたアイテムをログに出力
     setComponents([...components, item]);
   };
 
@@ -46,11 +46,15 @@ export default function Editor({ website }: EditorProps) {
       setComponents(elements);
     };
 
+    if (!website.html) return;
+
     initializeComponents();
   }, [website.html]);
 
   // componentsが更新されたときにHTMLを生成し、サーバーに送信する
   useEffect(() => {
+    if (!components) return;
+
     const html = components
       .map((component, index) => {
         // typeに基づいて適切なHTMLを生成
@@ -63,13 +67,16 @@ export default function Editor({ website }: EditorProps) {
       .join("");
 
     // 生成したHTMLをサーバーに送信
-    fetch(`/api/website/update/${website.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ html }),
-    });
+    // htmlが空でない場合のみ送信
+    if (html) {
+      fetch(`/api/website/update/${website.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ html }),
+      });
+    }
   }, [components, website.id]);
 
   return (

@@ -34,9 +34,9 @@ export default function View({ id }) {
     async function fetchHtml() {
       const path = "components/template/1/code/campaign/jp/index.html";
       const encodedPath = encodeURIComponent(path);
-      console.log(`Encoded path: ${encodedPath}`); // この行を追加
+      // console.log(`Encoded path: ${encodedPath}`); // この行を追加
       const url = `/api/loadHtml?path=${encodedPath}`;
-      console.log(`Fetching HTML from: ${url}`); // デバッグ追加
+      // console.log(`Fetching HTML from: ${url}`); // デバッグ追加
 
       const res = await fetch(url);
       if (res.ok) {
@@ -55,6 +55,7 @@ export default function View({ id }) {
       {/* ヘッダー */}
       <ViewHeader>
         <div className="flex items-center ml-auto mr-16">
+          {/* プレビュー切り替え */}
           <button
             id="desktop"
             className="hover:text-primary cursor-pointer"

@@ -5,14 +5,14 @@
 */
 "use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { FormEvent, useEffect, useRef, useState } from 'react';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
-import { ErrorMessage } from '@/components/toast';
-import { useStore } from '@/store';
+import { ErrorMessage } from "@/components/toast";
+import { useStore } from "@/store";
 
-import Logo from './logo';
+import Logo from "./logo";
 
 // ログイン
 const Login = () => {
@@ -62,7 +62,7 @@ const Login = () => {
       }),
     });
 
-    console.log(response);
+    console.log("ログインレスポンス：" + response);
 
     if (response.ok) {
       const data = await response.json();
