@@ -97,17 +97,13 @@ export default function View({ id }) {
       </ViewHeader>
 
       {/* メインコンテンツ */}
-      <div
-        className={`w-full min-h-screen mt-[89px] ${
-          htmlContent ? "" : "bg-[#EFF0F3]"
-        }`}
-      >
+      <div className={`w-full min-h-screen mt-[89px] bg-[#F9FAFA]`}>
         {/* デスクトップ */}
         {viewMode === "desktop" && (
           <div className="desktop-prev">
             <div
               className={`desktop-prev__body ${
-                htmlContent ? "" : "bg-[#c2c7cb]"
+                htmlContent ? "bg-white" : "bg-[#C2C7CB]"
               }`}
               dangerouslySetInnerHTML={{ __html: htmlContent }}
             ></div>
@@ -119,7 +115,7 @@ export default function View({ id }) {
             <div className="mobile-prev mx-auto">
               <div
                 className={`mobile-prev__body ${
-                  htmlContent ? "" : "bg-[#c2c7cb]"
+                  htmlContent ? "bg-white" : "bg-[#C2C7CB]"
                 }`}
                 dangerouslySetInnerHTML={{ __html: htmlContent }}
               ></div>
