@@ -1,5 +1,4 @@
-## L-Generater について
-
+## LIX について
 このアプリはHTML ビルダーです。
 Next.js, Typescript, Postgresql で作成されています。
 Docker で Node と Postgresql 環境を用意しています。
