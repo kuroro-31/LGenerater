@@ -235,7 +235,7 @@ export default function Edit({ id }) {
       </EditHeader>
 
       {/* エディタ */}
-      <div className="min-h-screen">
+      <div className="h-[calc(100vh-51px)] overflow-y-auto">
         {loading ? (
           <div className="w-full h-[500px] flex items-center justify-center">
             <Loading />
