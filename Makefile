@@ -38,7 +38,7 @@ studio:
 pri-seed:
 	npx prisma db seed
 db-access: # -Uと-dの値は.envのDB_USERとDB_NAMEの値を入れる
-	docker-compose exec db psql -U johndoe -d mydb
+	docker-compose exec db psql -U user -d mydb
 check-3000: # 3000を使ってる環境のチェック
 	lsof -i :3000
 kill-9: # 3000を使ってる環境のチェック
