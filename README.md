@@ -1,5 +1,6 @@
 ## LIX について
-このアプリはHTML ビルダーです。
+
+このアプリは HTML ビルダーです。
 Next.js, Typescript, Postgresql で作成されています。
 Docker で Node と Postgresql 環境を用意しています。
 TailwindCSS, Sass でスタイリングをしています。
@@ -70,3 +71,10 @@ Zustand という状態管理ライブラリを使用して、アプリケーシ
 
 - テンプレート
   ユーザーが自分のウェブサイトの作成を始めるための多数のプロフェッショナルなテンプレートを提供しています。
+
+## テストユーザーの作成の SQL
+
+```
+INSERT INTO "User" (email, name, password)
+VALUES ('aaa@gmail.com', 'username', 'password');
+```

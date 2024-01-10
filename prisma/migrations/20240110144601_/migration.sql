@@ -2,9 +2,20 @@
 CREATE TYPE "ElementType" AS ENUM ('HEADER', 'FOOTER', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6');
 
 -- CreateTable
+CREATE TABLE "User" (
+    "id" SERIAL NOT NULL,
+    "email" TEXT NOT NULL,
+    "name" TEXT,
+    "password" TEXT NOT NULL,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Website" (
     "id" SERIAL NOT NULL,
     "title" TEXT NOT NULL,
+    "html" TEXT,
     "templateId" INTEGER,
 
     CONSTRAINT "Website_pkey" PRIMARY KEY ("id")
@@ -35,6 +46,9 @@ CREATE TABLE "_UserToWebsite" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "_UserToWebsite_AB_unique" ON "_UserToWebsite"("A", "B");

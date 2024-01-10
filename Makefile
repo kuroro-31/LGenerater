@@ -1,5 +1,5 @@
 key:
-	cp .env.example .env.local
+	cp .env.example .env
 reset:
 	rm -rf .next
 	rm -rf node_modules
@@ -26,17 +26,19 @@ d-build:
 d-down:
 	docker-compose down
 d-clean:
-	docker images -q | xargs -r docker rmi -f && docker system prune -a
+	docker images -q | xargs -r docker rmi -f && docker system prune -a && docker-compose down --volumes --remove-orphans
 d-stats:
 	docker stats
 d-exec:
 	docker-compose exec app bash
 migrate:
-	npx prisma migrate dev && npx prisma generate
+	docker-compose exec app npx prisma migrate dev && docker-compose exec app npx prisma generate
 studio:
-	npx prisma studio
+	docker-compose exec app npx prisma studio
 pri-seed:
-	npx prisma db seed
+	docker-compose exec app npx prisma db seed
+db-reset:
+	docker-compose down && docker volume rm lgenerater_postgres_data
 db-access: # -Uと-dの値は.envのDB_USERとDB_NAMEの値を入れる
 	docker-compose exec db psql -U user -d mydb
 check-3000: # 3000を使ってる環境のチェック
