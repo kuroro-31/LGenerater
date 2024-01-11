@@ -136,8 +136,14 @@ export default function Editor({ website }: EditorProps) {
     setMode(newMode);
 
     if (newMode === "code") {
-      setHtml(generateHtmlFromComponents(components));
+      // ビジュアルモードからコードモードに切り替える際には、
+      // componentsからHTMLを生成してcodeとhtmlの状態を更新する
+      const newHtml = generateHtmlFromComponents(components);
+      setHtml(newHtml);
+      setCode(newHtml);
     } else {
+      // コードモードからビジュアルモードに切り替える際には、
+      // 現在のcodeからcomponentsを生成してcomponentsの状態を更新する
       setComponents(parseHtmlToComponents(html));
     }
   };
