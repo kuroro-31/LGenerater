@@ -1,3 +1,6 @@
+import "highlight.js/styles/atom-one-dark.css";
+
+import hljs from "highlight.js";
 import React, { useEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -29,6 +32,7 @@ export default function Editor({ website }: EditorProps) {
   // ページがロードされたとき、またはwebsite.htmlが更新されたときにHTMLを解析してcomponentsステートを初期化
   useEffect(() => {
     const initializeComponents = async () => {
+      if (!website.html) return;
       const html = website.html;
 
       // HTMLを解析
@@ -125,9 +129,15 @@ export default function Editor({ website }: EditorProps) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newHtml = e.target.value;
-
     // htmlステートを更新
     setHtml(newHtml);
+    setCode(newHtml);
+
+    // カーソル位置を更新
+    setCursorPosition({
+      start: e.target.selectionStart,
+      end: e.target.selectionEnd,
+    });
 
     // 既存のタイマーがあればクリア
     if (timerRef.current) {
@@ -174,6 +184,7 @@ export default function Editor({ website }: EditorProps) {
   const [lineNumbers, setLineNumbers] = useState<string[]>([]);
   // htmlが更新されたときに行番号を更新する
   useEffect(() => {
+    if (!html) return;
     // 改行ごとに分割して行数を計算
     const lines = html.split("\n");
     // 行番号の配列を生成
@@ -181,6 +192,85 @@ export default function Editor({ website }: EditorProps) {
     // 行番号のステートを更新
     setLineNumbers(newLineNumbers);
   }, [html]);
+
+  useEffect(() => {
+    // コードハイライトを適用
+    hljs.highlightAll();
+  }, [html]);
+
+  const [code, setCode] = useState("");
+
+  // ハイライトされたコードを生成
+  const highlightedCode = hljs.highlightAuto(code).value;
+
+  const [cursorPosition, setCursorPosition] = useState({ start: 0, end: 0 });
+  const handleSelect = (e) => {
+    setCursorPosition({
+      start: e.target.selectionStart,
+      end: e.target.selectionEnd,
+    });
+  };
+  // カーソル位置に基づいて行の背景色を設定する関数
+  const getHighlightedCodeWithCursor = (code, cursorPosition) => {
+    const beforeCursor = hljs.highlightAuto(
+      code.slice(0, cursorPosition.start)
+    ).value;
+    const afterCursor = hljs.highlightAuto(
+      code.slice(cursorPosition.end)
+    ).value;
+
+    // カーソル位置を示す空のspanタグを挿入
+    const cursorHtml = `<span class="cursor-blink"></span>`;
+
+    // 選択されたテキストをオレンジ色の背景でラップする
+    const selectedText = hljs.highlightAuto(
+      code.slice(cursorPosition.start, cursorPosition.end)
+    ).value;
+    const selectedHtml = `<span class="hljs-selected">${selectedText}</span>`;
+
+    return {
+      __html: beforeCursor + selectedHtml + cursorHtml + afterCursor,
+    };
+  };
+
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // デフォルトの改行挿入を防ぐ
+
+      const { start, end } = cursorPosition;
+      const beforeCursor = code.slice(0, start);
+      const afterCursor = code.slice(end);
+
+      // 改行を挿入してコードを更新
+      const newCode = beforeCursor + "\n" + afterCursor;
+      setCode(newCode);
+
+      // カーソル位置を更新（改行後の次の位置に設定）
+      const newCursorPosition = start + 1;
+      setCursorPosition({ start: newCursorPosition, end: newCursorPosition });
+
+      // ハイライトされたコードを更新
+      // この行は削除: const highlightedCodeWithCursor = getHighlightedCodeWithCursor(newCode, ...
+
+      // textareaのカーソル位置を更新
+      if (textAreaRef.current) {
+        textAreaRef.current.selectionStart = newCursorPosition;
+        textAreaRef.current.selectionEnd = newCursorPosition;
+      }
+    }
+  };
+
+  const [highlightedCodeWithCursor, setHighlightedCodeWithCursor] = useState({
+    __html: "",
+  });
+  useEffect(() => {
+    const newHighlightedCodeWithCursor = getHighlightedCodeWithCursor(
+      code,
+      cursorPosition
+    );
+    setHighlightedCodeWithCursor(newHighlightedCodeWithCursor);
+  }, [code, cursorPosition]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -263,21 +353,39 @@ export default function Editor({ website }: EditorProps) {
               })}
             </DropArea>
           ) : (
-            <div className="w-full h-full max-w-[870px] shadow-lg flex bg-black text-white p-4 rounded-lg">
+            <div className="w-full h-full max-w-[870px]">
               {/* 行番号 */}
-              <pre style={{ userSelect: "none", marginRight: "1em" }}>
-                {lineNumbers.map((number, index) => (
-                  <div key={index} className="text-right min-w-[1.5em]">
-                    {number}
-                  </div>
-                ))}
-              </pre>
+              <code className="html hljs w-full h-full flex shadow-lg rounded-lg">
+                <pre
+                  style={{ userSelect: "none", marginRight: "1em" }}
+                  className="my-4"
+                >
+                  {lineNumbers.map((number, index) => (
+                    <div key={index} className="text-right min-w-[1.5em]">
+                      {number}
+                    </div>
+                  ))}
+                </pre>
 
-              <textarea
-                value={html}
-                className="w-full bg-transparent outline-none"
-                onChange={handleCodeChange}
-              />
+                <div className="relative w-full">
+                  <pre className="absolute top-0 left-0 w-full h-full overflow-auto pointer-events-none pr-4">
+                    <code
+                      className="hljs"
+                      dangerouslySetInnerHTML={highlightedCodeWithCursor}
+                    />
+                  </pre>
+                  <textarea
+                    ref={textAreaRef}
+                    className="w-full h-full bg-transparent resize-none outline-none"
+                    value={code}
+                    onChange={handleCodeChange}
+                    onKeyDown={handleKeyDown}
+                    onSelect={handleSelect}
+                    onKeyUp={handleSelect}
+                    onClick={handleSelect}
+                  />
+                </div>
+              </code>
             </div>
           )}
         </div>
