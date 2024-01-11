@@ -223,15 +223,15 @@ export default function Editor({ website }: EditorProps) {
                   ))}
                 </pre>
                 <div className="relative w-full">
-                  <pre className="absolute top-0 left-0 w-full h-full overflow-auto pointer-events-none pr-4">
+                  <pre className="absolute top-0 left-0 w-full h-full pointer-events-none whitespace-pre-wrap">
                     <code
-                      className="hljs"
+                      className="hljs h-full"
                       dangerouslySetInnerHTML={highlightedCodeWithCursor}
                     />
                   </pre>
                   <textarea
                     ref={textAreaRef}
-                    className="w-full h-full bg-transparent resize-none outline-none"
+                    className="w-full h-full bg-transparent resize-none outline-none p-4"
                     value={code}
                     onChange={handleCodeChange}
                     onKeyDown={handleKeyDown}
