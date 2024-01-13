@@ -50,16 +50,18 @@ export default function Edit({ id }) {
   const [website, setWebsite] = useState<Website | null>(null); // ウェブサイトの型を指定
   const [loading, setLoading] = useState(false); // loadingフラグを追加
   useEffect(() => {
-    setLoading(true); // データ取得前にloadingをtrueに
-    if (id) {
-      fetch(`/api/website/${id}`)
-        .then((response) => response.json())
-        .then((data: Website) => {
-          setWebsite(data); // 取得したデータがウェブサイトの型であることを指定
-          setInputValue(data.title); // 取得したウェブサイトのタイトルを入力値に設定
-          setLoading(false); // データ取得後にloadingをfalseに
-        });
-    }
+    const fetchWebsite = async () => {
+      setLoading(true); // データ取得前にloadingをtrueに
+      if (id) {
+        const response = await fetch(`/api/website/${id}`);
+        const data: Website = await response.json();
+        setWebsite(data); // 取得したデータがウェブサイトの型であることを指定
+        setInputValue(data.title); // 取得したウェブサイトのタイトルを入力値に設定
+        setLoading(false); // データ取得後にloadingをfalseに
+      }
+    };
+
+    fetchWebsite();
   }, [id]);
 
   // IDからウェブサイトを更新する
