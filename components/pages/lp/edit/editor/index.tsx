@@ -32,10 +32,33 @@ export default function Editor({ website }: EditorProps) {
   const parseHtmlToComponents = (htmlString: string): WebsiteElement[] => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlString, "text/html");
-    return Array.from(doc.body.children).map((element) => ({
-      type: element.tagName.toLowerCase(),
-      content: element.innerHTML,
-    }));
+    const elements: WebsiteElement[] = [];
+
+    function decodeHtml(html: string): string {
+      const txt = document.createElement("textarea");
+      txt.innerHTML = html;
+      return txt.value;
+    }
+
+    function parseElement(element: Element): WebsiteElement {
+      return {
+        type: element.tagName.toLowerCase(),
+        props: Array.from(element.attributes).reduce((acc, attr) => {
+          acc[attr.name] = attr.value;
+          return acc;
+        }, {}),
+        content: decodeHtml(element.innerHTML), // HTMLエンティティをデコード
+        children: Array.from(element.children).map(parseElement),
+      };
+    }
+
+    doc.body.childNodes.forEach((node) => {
+      if (node.nodeType === Node.ELEMENT_NODE) {
+        elements.push(parseElement(node as Element));
+      }
+    });
+
+    return elements;
   };
 
   // WebsiteElement配列からHTML文字列を生成する関数
@@ -43,9 +66,12 @@ export default function Editor({ website }: EditorProps) {
     return elements
       .map((component) => {
         if (component.type === "img") {
-          return `<img src="/noimage.png" />`;
+          return `<img src="${component.props.src || "/noimage.png"}" />`;
         } else {
-          return `<${component.type}>${
+          const props = Object.entries(component.props)
+            .map(([key, value]) => `${key}="${value}"`)
+            .join(" ");
+          return `<${component.type} ${props}>${
             component.content || "ここにテキスト"
           }</${component.type}>`;
         }
@@ -81,17 +107,55 @@ export default function Editor({ website }: EditorProps) {
   // コードモードの処理
   const handleCodeChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newHtml = e.target.value;
+    // htmlステートを更新
     setHtml(newHtml);
     setCode(newHtml);
+
+    // カーソル位置を更新
     setCursorPosition({
       start: e.target.selectionStart,
       end: e.target.selectionEnd,
     });
 
-    if (timerRef.current) clearTimeout(timerRef.current);
+    // 既存のタイマーがあればクリア
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    // 新しいタイマーを設定
     timerRef.current = setTimeout(() => {
-      setComponents(parseHtmlToComponents(newHtml));
-    }, 3000);
+      try {
+        // HTMLを解析
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(newHtml, "text/html");
+
+        // HTML要素をWebsiteElementに変換
+        const elements = Array.from(doc.body.children).map((element) => {
+          return {
+            type: element.tagName.toLowerCase(),
+            // 実際の要素の内容を反映
+            content: element.innerHTML,
+          };
+        });
+
+        // componentsステートを更新
+        setComponents(elements);
+
+        // 生成したHTMLをサーバーに送信
+        // htmlが空でない場合のみ送信
+        if (newHtml) {
+          fetch(`/api/website/update/${website.id}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ html: newHtml }),
+          });
+        }
+      } catch (error) {
+        console.error("Failed to parse HTML:", error);
+      }
+    }, 3000); // 3秒後に実行
   };
 
   // 行番号の更新
@@ -196,18 +260,11 @@ export default function Editor({ website }: EditorProps) {
           </button>
           {mode === "visual" ? (
             <DropArea onDrop={handleDrop}>
-              {components.map((component, index) =>
-                component.type === "img"
-                  ? React.createElement(component.type, {
-                      key: index,
-                      src: "/noimage.png",
-                    })
-                  : React.createElement(
-                      component.type,
-                      { key: index },
-                      component.content || "ここにテキスト"
-                    )
-              )}
+              <div
+                className="canvas-content w-full h-full max-w-[870px] shadow-lg rounded"
+                style={{ backgroundColor: "white" }}
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
             </DropArea>
           ) : (
             <div className="w-full h-full max-w-[870px]">
