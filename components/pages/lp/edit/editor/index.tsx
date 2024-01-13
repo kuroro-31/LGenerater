@@ -238,9 +238,13 @@ export default function Editor({ website }: EditorProps) {
   // 選択範囲の変更時の処理
   const handleSelect = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
     const target = e.target as HTMLTextAreaElement;
+    // selectionStartとselectionEndはテキストエリアの先頭からのカーソルの位置を返します
+    const start = target.selectionStart;
+    const end = target.selectionEnd;
+    // カーソル位置をステートに保存
     setCursorPosition({
-      start: target.selectionStart,
-      end: target.selectionEnd,
+      start: start,
+      end: end,
     });
   };
 
