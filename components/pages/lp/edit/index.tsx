@@ -107,7 +107,7 @@ export default function Edit({ id }) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen">
       {isModalOpen && (
         <div className="w-full min-h-screen max-h-screen absolute z-[100] top-0 left-0 p-4 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6">
@@ -237,15 +237,13 @@ export default function Edit({ id }) {
       </EditHeader>
 
       {/* エディタ */}
-      <div className="h-[calc(100vh-51px)] overflow-y-auto">
-        {loading ? (
-          <div className="w-full h-[500px] flex items-center justify-center">
-            <Loading />
-          </div>
-        ) : (
-          website && <Editor website={website} />
-        )}
-      </div>
+      {loading ? (
+        <div className="w-full h-[500px] flex items-center justify-center">
+          <Loading />
+        </div>
+      ) : (
+        website && <Editor website={website} />
+      )}
     </div>
   );
 }

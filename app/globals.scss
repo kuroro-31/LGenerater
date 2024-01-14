@@ -210,29 +210,3 @@ body {
 .desktop-prev__body {
   @apply min-h-screen;
 }
-
-/*
-|--------------------------------------------------------------------------
-| コードハイライト
-|--------------------------------------------------------------------------
-*/
-.cursor-line {
-  display: block; /* 行全体をハイライトするためにブロック要素として表示 */
-  background-color: rgba(255, 255, 0, 0.5); /* カーソルのある行の背景色 */
-}
-.cursor-blink {
-  @apply inline-block w-[2px] h-[1rem] bg-orange-400;
-  animation: blink-animation 1s steps(5, start) infinite;
-}
-
-@keyframes blink-animation {
-  to {
-    visibility: hidden;
-  }
-}
-.hljs-selected {
-  @apply bg-blue-500 bg-opacity-70;
-}
-.hljs-p-0 {
-  padding: 0 !important;
-}
