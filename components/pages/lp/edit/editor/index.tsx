@@ -172,10 +172,7 @@ export default function Editor({ website }: EditorProps) {
   );
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
-
     const element = e.target as HTMLElement;
-
-    console.log(element);
 
     setSelectedElement({
       type: element.tagName.toLowerCase(),
@@ -185,6 +182,20 @@ export default function Editor({ website }: EditorProps) {
       }, {}),
       content: element.innerHTML,
     });
+  };
+
+  const handleHover = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    // すべての要素からhoverスタイルを削除
+    document.querySelectorAll(".hover-style").forEach((el) => {
+      el.classList.remove("hover-style");
+    });
+
+    const element = e.target as HTMLElement;
+
+    // 直接hoverされた要素にhoverスタイルを適用
+    element.classList.add("hover-style");
   };
 
   const updateElement = (newProps: { [key: string]: any }) => {
@@ -217,15 +228,16 @@ export default function Editor({ website }: EditorProps) {
                 style={{ backgroundColor: "white" }}
                 dangerouslySetInnerHTML={{ __html: html }}
                 onClick={handleClick}
+                onMouseOver={handleHover}
               />
               <style>
                 {`
-                .canvas-content *:hover {
-                  background-color: rgba(111, 86, 249, 0.05);
-                  border: 1px solid rgba(111, 86, 249, 1);
-                  cursor: pointer;
-                  border-radius: 4px;
-                }
+                  .hover-style {
+                    background-color: rgba(111, 86, 249, 0.15);
+                    border: 1px solid rgba(111, 86, 249, 1);
+                    cursor: pointer;
+                    border-radius: 2px;
+                  }
               `}
               </style>
             </DropArea>
