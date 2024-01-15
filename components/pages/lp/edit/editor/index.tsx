@@ -1,16 +1,16 @@
-import "highlight.js/styles/atom-one-dark.css";
+import 'highlight.js/styles/atom-one-dark.css';
 
-import hljs from "highlight.js";
-import { XIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import hljs from 'highlight.js';
+import { XIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import { Website } from "@/types/website";
-import { WebsiteElement } from "@/types/websiteElement";
+import { Website } from '@/types/website';
+import { WebsiteElement } from '@/types/websiteElement';
 
-import DraggableComponent from "./DraggableComponent";
-import DropArea from "./DropArea";
+import DraggableComponent from './DraggableComponent';
+import DropArea from './DropArea';
 
 interface EditorProps {
   website: Website;
@@ -172,6 +172,7 @@ export default function Editor({ website }: EditorProps) {
   );
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
+    e.preventDefault(); // デフォルトの挙動をキャンセル
     const element = e.target as HTMLElement;
 
     setSelectedElement({
