@@ -1,15 +1,15 @@
-import "highlight.js/styles/atom-one-dark.css";
+import 'highlight.js/styles/atom-one-dark.css';
 
-import hljs from "highlight.js";
-import { useEffect, useRef, useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import hljs from 'highlight.js';
+import { useEffect, useRef, useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import { Website } from "@/types/website";
-import { WebsiteElement } from "@/types/websiteElement";
+import { Website } from '@/types/website';
+import { WebsiteElement } from '@/types/websiteElement';
 
-import DraggableComponent from "./DraggableComponent";
-import DropArea from "./DropArea";
+import DraggableComponent from './DraggableComponent';
+import DropArea from './DropArea';
 
 interface EditorProps {
   website: Website;
@@ -166,6 +166,35 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [html, cursorPosition]); // cursorPositionを依存配列に追加
 
+  const [selectedElement, setSelectedElement] = useState<WebsiteElement | null>(
+    null
+  );
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    const element = e.target as HTMLElement;
+
+    console.log(element);
+
+    setSelectedElement({
+      type: element.tagName.toLowerCase(),
+      props: Array.from(element.attributes).reduce((acc, attr) => {
+        acc[attr.name] = attr.value;
+        return acc;
+      }, {}),
+      content: element.innerHTML,
+    });
+  };
+
+  const updateElement = (newProps: { [key: string]: any }) => {
+    if (selectedElement) {
+      setSelectedElement({
+        ...selectedElement,
+        props: { ...selectedElement.props, ...newProps },
+      });
+    }
+  };
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="editor flex h-full mt-8">
@@ -174,7 +203,7 @@ export default function Editor({ website }: EditorProps) {
           <DraggableComponent type="p" />
           <DraggableComponent type="img" />
         </div>
-        <div className="canvas w-4/5  h-full min-h-[500px]">
+        <div className="canvas relative w-4/5 h-full min-h-[500px]">
           <button onClick={toggleMode} className="mb-4">
             {mode === "visual"
               ? "コードモードに切り替え"
@@ -186,7 +215,16 @@ export default function Editor({ website }: EditorProps) {
                 className="canvas-content w-full h-full max-w-[870px] shadow-lg rounded"
                 style={{ backgroundColor: "white" }}
                 dangerouslySetInnerHTML={{ __html: html }}
+                onClick={handleClick}
               />
+              <style>
+                {`
+                .canvas-content *:hover {
+                  background-color: rgba(38, 75, 153, 0.1);
+                  cursor: pointer;
+                }
+              `}
+              </style>
             </DropArea>
           ) : (
             <div className="w-full h-full max-w-[870px] mb-8">
@@ -332,6 +370,35 @@ export default function Editor({ website }: EditorProps) {
                   </code>
                 </pre>
               </code>
+            </div>
+          )}
+
+          {/* クイック編集 */}
+          {selectedElement && (
+            <div className="properties-panel fixed top-[50px] right-0 h-[calc(100vh-50px)] overflow-auto">
+              <div className="bg-white shadow-lg rounded-lg p-4 h-full">
+                <h2 className="mb-4 font-normal">クイック編集</h2>
+
+                <h3>{selectedElement.type}</h3>
+                <textarea
+                  value={selectedElement.content}
+                  onChange={(e) =>
+                    setSelectedElement({
+                      ...selectedElement,
+                      content: e.target.value,
+                    })
+                  }
+                />
+                {Object.entries(selectedElement.props).map(([key, value]) => (
+                  <div key={key}>
+                    <label>{key}</label>
+                    <input
+                      value={value}
+                      onChange={(e) => updateElement({ [key]: e.target.value })}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </div>
