@@ -1,15 +1,16 @@
-import 'highlight.js/styles/atom-one-dark.css';
+import "highlight.js/styles/atom-one-dark.css";
 
-import hljs from 'highlight.js';
-import { useEffect, useRef, useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import hljs from "highlight.js";
+import { XIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { Website } from '@/types/website';
-import { WebsiteElement } from '@/types/websiteElement';
+import { Website } from "@/types/website";
+import { WebsiteElement } from "@/types/websiteElement";
 
-import DraggableComponent from './DraggableComponent';
-import DropArea from './DropArea';
+import DraggableComponent from "./DraggableComponent";
+import DropArea from "./DropArea";
 
 interface EditorProps {
   website: Website;
@@ -220,8 +221,10 @@ export default function Editor({ website }: EditorProps) {
               <style>
                 {`
                 .canvas-content *:hover {
-                  background-color: rgba(38, 75, 153, 0.1);
+                  background-color: rgba(111, 86, 249, 0.05);
+                  border: 1px solid rgba(111, 86, 249, 1);
                   cursor: pointer;
+                  border-radius: 4px;
                 }
               `}
               </style>
@@ -374,22 +377,36 @@ export default function Editor({ website }: EditorProps) {
           )}
 
           {/* クイック編集 */}
-          {selectedElement && (
-            <div className="properties-panel fixed top-[50px] right-0 h-[calc(100vh-50px)] overflow-auto">
-              <div className="bg-white shadow-lg rounded-lg p-4 h-full">
-                <h2 className="mb-4 font-normal">クイック編集</h2>
+          <div
+            className={`properties-panel fixed top-0 right-0 w-[288px] h-screen overflow-auto transition-all duration-400 ease-in-out transform ${
+              selectedElement
+                ? "translate-x-0 opacity-100 visible"
+                : "translate-x-full opacity-0 invisible"
+            }`}
+          >
+            <div className="bg-white shadow-lg rounded-lg p-4 h-full">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="font-normal">クイック編集</h2>
+                <button
+                  onClick={() => setSelectedElement(null)}
+                  className="text-gray-500"
+                >
+                  <XIcon className="w-6 h-6" />
+                </button>
+              </div>
 
-                <h3>{selectedElement.type}</h3>
-                <textarea
-                  value={selectedElement.content}
-                  onChange={(e) =>
-                    setSelectedElement({
-                      ...selectedElement,
-                      content: e.target.value,
-                    })
-                  }
-                />
-                {Object.entries(selectedElement.props).map(([key, value]) => (
+              <h3>{selectedElement?.type}</h3>
+              <textarea
+                value={selectedElement?.content || ""}
+                onChange={(e) =>
+                  setSelectedElement({
+                    ...selectedElement,
+                    content: e.target.value,
+                  })
+                }
+              />
+              {Object.entries(selectedElement?.props || {}).map(
+                ([key, value]) => (
                   <div key={key}>
                     <label>{key}</label>
                     <input
@@ -397,10 +414,10 @@ export default function Editor({ website }: EditorProps) {
                       onChange={(e) => updateElement({ [key]: e.target.value })}
                     />
                   </div>
-                ))}
-              </div>
+                )
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </DndProvider>
