@@ -190,7 +190,7 @@ export default function Editor({ website }: EditorProps) {
             </DropArea>
           ) : (
             <div className="w-full h-full max-w-[870px] mb-8">
-              <code className="html hljs w-full h-full flex shadow-lg rounded-lg">
+              <code className="html hljs w-full h-full flex shadow-lg rounded-lg overflow-auto">
                 {/* 行番号 */}
                 <pre className="py-4">
                   {lineNumbers.map((number, index) => (
@@ -201,7 +201,7 @@ export default function Editor({ website }: EditorProps) {
                 </pre>
 
                 {/* コードの編集 */}
-                <pre className="w-full">
+                <pre>
                   <code
                     contentEditable
                     className="html outline-none"
@@ -221,7 +221,8 @@ export default function Editor({ website }: EditorProps) {
                     }}
                     onInput={(e) => {
                       if (!isComposing) {
-                        const newHtml = (e.target as HTMLElement).innerText;
+                        let newHtml = (e.target as HTMLElement).innerText;
+
                         setHtml(newHtml);
                         setCode(newHtml);
 
