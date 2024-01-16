@@ -208,30 +208,76 @@ export default function Editor({ website }: EditorProps) {
   return (
     <DndProvider backend={HTML5Backend}>
       <div
-        className="editor flex h-full mt-[50px]"
+        className="editor flex w-full h-full mt-[50px]"
         onClick={() => setSelectedElement(null)} // canvas-content以外要素クリックでクイック編集閉
       >
-        <div className="draggable-components w-1/5 p-4 rounded"></div>
-        <div className="canvas relative w-4/5 h-full min-h-[500px] pt-8">
-          <button onClick={toggleMode} className="mb-4">
-            {mode === "visual"
-              ? "コードモードに切り替え"
-              : "ビジュアルモードに切り替え"}
-          </button>
-          {mode === "visual" ? (
-            <>
-              <div
-                className="canvas-content w-full h-full max-w-[870px] shadow-lg rounded"
-                style={{ backgroundColor: "white" }}
-                dangerouslySetInnerHTML={{ __html: html }}
-                onClick={(e) => {
-                  e.stopPropagation(); // canvas-content以外要素クリックでクイック編集閉
-                  handleClick(e);
-                }}
-                onMouseOver={handleHover}
-              />
-              <style>
-                {`
+        {/* LP情報設定 */}
+        {/* <div
+          className={`properties-panel fixed top-[50px] left-0 w-[288px] h-screen overflow-auto transition-all duration-400 ease-in-out transform ${
+            selectedElement
+              ? "translate-x-0 opacity-100 visible"
+              : "-translate-x-full opacity-0 invisible"
+          }`}
+          onClick={(e) => e.stopPropagation()} // クイック編集以外の要素クリックでクイック編集閉
+        >
+          <div className="bg-white shadow-lg rounded-lg p-4 h-full">
+            <div className="flex justify-between items-center border-b pb-3 mb-3">
+              <h2 className="font-normal">クイック編集</h2>
+              <button
+                onClick={() => setSelectedElement(null)}
+                className="text-gray-500"
+              >
+                <XIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
+            <input
+              className="w-full p-2 border border-primary rounded mb-4"
+              value={selectedElement?.content || ""}
+              onChange={(e) =>
+                setSelectedElement({
+                  ...selectedElement,
+                  content: e.target.value,
+                })
+              }
+            />
+            {Object.entries(selectedElement?.props || {}).map(
+              ([key, value]) => (
+                <div key={key} className="mb-2">
+                  <label className="block font-bold mb-1">{key}</label>
+                  <input
+                    className="w-full p-2 border border-primary rounded"
+                    value={value}
+                    onChange={(e) => updateElement({ [key]: e.target.value })}
+                  />
+                </div>
+              )
+            )}
+          </div>
+        </div> */}
+
+        <div className="canvas relative w-full flex flex-col items-center min-h-[500px] pt-8">
+          <div>
+            <button onClick={toggleMode} className="mb-4">
+              {mode === "visual"
+                ? "コードモードに切り替え"
+                : "ビジュアルモードに切り替え"}
+            </button>
+            {mode === "visual" ? (
+              <>
+                <div
+                  className="canvas-content w-full h-full max-w-[870px] shadow-lg rounded"
+                  style={{ backgroundColor: "white" }}
+                  dangerouslySetInnerHTML={{ __html: html }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // canvas-content以外要素クリックでクイック編集閉
+                    handleClick(e);
+                  }}
+                  onMouseOver={handleHover}
+                />
+                <style>
+                  {`
                   .hover-style {
                     background-color: rgba(111, 86, 249, 0.15);
                     border: 1px solid rgba(111, 86, 249, 1);
@@ -239,198 +285,201 @@ export default function Editor({ website }: EditorProps) {
                     border-radius: 2px;
                   }
               `}
-              </style>
-            </>
-          ) : (
-            <div className="w-full h-full max-w-[870px] mb-8">
-              <code className="html hljs w-full h-full flex shadow-lg rounded-lg overflow-auto">
-                {/* 行番号 */}
-                <pre className="py-4">
-                  {lineNumbers.map((number, index) => (
-                    <div key={index} className="text-right min-w-[1.5em]">
-                      {number}
-                    </div>
-                  ))}
-                </pre>
+                </style>
+              </>
+            ) : (
+              <div className="w-full h-full max-w-[870px] mb-8">
+                <code className="html hljs w-full h-full flex shadow-lg rounded-lg overflow-auto">
+                  {/* 行番号 */}
+                  <pre className="py-4">
+                    {lineNumbers.map((number, index) => (
+                      <div key={index} className="text-right min-w-[1.5em]">
+                        {number}
+                      </div>
+                    ))}
+                  </pre>
 
-                {/* コードの編集 */}
-                <pre>
-                  <code
-                    contentEditable
-                    className="html outline-none"
-                    ref={textAreaRef}
-                    onCompositionStart={(e) => {
-                      setIsComposing(true);
-                    }}
-                    onCompositionEnd={(e) => {
-                      setIsComposing(false);
-                      // 行番号を更新
-                      const newHtml = (e.target as HTMLElement).innerText;
-                      setLineNumbers(
-                        newHtml
-                          .split("\n")
-                          .map((_, index) => (index + 1).toString())
-                      );
-                    }}
-                    onInput={(e) => {
-                      if (!isComposing) {
-                        let newHtml = (e.target as HTMLElement).innerText;
-
-                        setHtml(newHtml);
-                        setCode(newHtml);
-
-                        const selection = document.getSelection();
-                        if (selection && selection.rangeCount > 0) {
-                          const range = selection.getRangeAt(0);
-                          if (range.startContainer === range.endContainer) {
-                            const start =
-                              range.startOffset +
-                              newHtml.substr(
-                                0,
-                                newHtml.indexOf(
-                                  range.startContainer.textContent
-                                )
-                              ).length;
-                            setCursorPosition(start); // カーソル位置を保存
-                          }
-                        }
-
+                  {/* コードの編集 */}
+                  <pre>
+                    <code
+                      contentEditable
+                      className="html outline-none"
+                      ref={textAreaRef}
+                      onCompositionStart={(e) => {
+                        setIsComposing(true);
+                      }}
+                      onCompositionEnd={(e) => {
+                        setIsComposing(false);
+                        // 行番号を更新
+                        const newHtml = (e.target as HTMLElement).innerText;
                         setLineNumbers(
                           newHtml
                             .split("\n")
                             .map((_, index) => (index + 1).toString())
                         );
+                      }}
+                      onInput={(e) => {
+                        if (!isComposing) {
+                          let newHtml = (e.target as HTMLElement).innerText;
 
-                        // 既存のタイマーがあればクリア
-                        if (timerRef.current) {
-                          clearTimeout(timerRef.current);
-                        }
+                          setHtml(newHtml);
+                          setCode(newHtml);
 
-                        // 新しいタイマーを設定
-                        timerRef.current = setTimeout(() => {
-                          try {
-                            // HTMLを解析
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(
-                              newHtml,
-                              "text/html"
-                            );
-
-                            // HTML要素をWebsiteElementに変換
-                            const elements = Array.from(doc.body.children).map(
-                              (element) => {
-                                return {
-                                  type: element.tagName.toLowerCase(),
-                                  // 実際の要素の内容を反映
-                                  content: element.innerHTML,
-                                };
-                              }
-                            );
-
-                            // componentsステートを更新
-                            setComponents(elements);
-
-                            // 生成したHTMLをサーバーに送信
-                            // htmlが空でない場合のみ送信
-                            if (newHtml) {
-                              fetch(`/api/website/update/${website.id}`, {
-                                method: "POST",
-                                headers: {
-                                  "Content-Type": "application/json",
-                                },
-                                body: JSON.stringify({ html: newHtml }),
-                              });
+                          const selection = document.getSelection();
+                          if (selection && selection.rangeCount > 0) {
+                            const range = selection.getRangeAt(0);
+                            if (range.startContainer === range.endContainer) {
+                              const start =
+                                range.startOffset +
+                                newHtml.substr(
+                                  0,
+                                  newHtml.indexOf(
+                                    range.startContainer.textContent
+                                  )
+                                ).length;
+                              setCursorPosition(start); // カーソル位置を保存
                             }
-                          } catch (error) {
-                            console.error("Failed to parse HTML:", error);
                           }
-                        }, 3000); // 3秒後に実行
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !isComposing) {
-                        e.preventDefault(); // エンターキーが押されたときのデフォルトの挙動を防ぐ
 
-                        // 改行を挿入
-                        const selection = window.getSelection();
-                        if (selection && selection.rangeCount) {
-                          const range = selection.getRangeAt(0);
-                          range.deleteContents();
-                          const br = document.createElement("br");
-                          range.insertNode(br);
-
-                          // 空のテキストノードを挿入
-                          const textNode = document.createTextNode("");
-                          range.insertNode(textNode);
-
-                          range.setStartAfter(br);
-                          range.setEndAfter(br);
-                          range.collapse(true);
-                          selection.removeAllRanges();
-                          selection.addRange(range);
-
-                          // 行番号を更新
-                          const newHtml = (e.target as HTMLElement).innerText;
                           setLineNumbers(
                             newHtml
                               .split("\n")
                               .map((_, index) => (index + 1).toString())
                           );
-                          return false;
+
+                          // 既存のタイマーがあればクリア
+                          if (timerRef.current) {
+                            clearTimeout(timerRef.current);
+                          }
+
+                          // 新しいタイマーを設定
+                          timerRef.current = setTimeout(() => {
+                            try {
+                              // HTMLを解析
+                              const parser = new DOMParser();
+                              const doc = parser.parseFromString(
+                                newHtml,
+                                "text/html"
+                              );
+
+                              // HTML要素をWebsiteElementに変換
+                              const elements = Array.from(
+                                doc.body.children
+                              ).map((element) => {
+                                return {
+                                  type: element.tagName.toLowerCase(),
+                                  // 実際の要素の内容を反映
+                                  content: element.innerHTML,
+                                };
+                              });
+
+                              // componentsステートを更新
+                              setComponents(elements);
+
+                              // 生成したHTMLをサーバーに送信
+                              // htmlが空でない場合のみ送信
+                              if (newHtml) {
+                                fetch(`/api/website/update/${website.id}`, {
+                                  method: "POST",
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                  },
+                                  body: JSON.stringify({ html: newHtml }),
+                                });
+                              }
+                            } catch (error) {
+                              console.error("Failed to parse HTML:", error);
+                            }
+                          }, 3000); // 3秒後に実行
                         }
-                      }
-                    }}
-                  >
-                    {code}
-                  </code>
-                </pre>
-              </code>
-            </div>
-          )}
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !isComposing) {
+                          e.preventDefault(); // エンターキーが押されたときのデフォルトの挙動を防ぐ
 
-          {/* クイック編集 */}
-          <div
-            className={`properties-panel fixed top-[50px] right-0 w-[288px] h-screen overflow-auto transition-all duration-400 ease-in-out transform ${
-              selectedElement
-                ? "translate-x-0 opacity-100 visible"
-                : "translate-x-full opacity-0 invisible"
-            }`}
-            onClick={(e) => e.stopPropagation()} // クイック編集以外の要素クリックでクイック編集閉
-          >
-            <div className="bg-white shadow-lg rounded-lg p-4 h-full">
-              <div className="flex justify-between items-center border-b pb-3 mb-3">
-                <h2 className="font-normal">クイック編集</h2>
-                <button
-                  onClick={() => setSelectedElement(null)}
-                  className="text-gray-500"
-                >
-                  <XIcon className="w-6 h-6" />
-                </button>
+                          // 改行を挿入
+                          const selection = window.getSelection();
+                          if (selection && selection.rangeCount) {
+                            const range = selection.getRangeAt(0);
+                            range.deleteContents();
+                            const br = document.createElement("br");
+                            range.insertNode(br);
+
+                            // 空のテキストノードを挿入
+                            const textNode = document.createTextNode("");
+                            range.insertNode(textNode);
+
+                            range.setStartAfter(br);
+                            range.setEndAfter(br);
+                            range.collapse(true);
+                            selection.removeAllRanges();
+                            selection.addRange(range);
+
+                            // 行番号を更新
+                            const newHtml = (e.target as HTMLElement).innerText;
+                            setLineNumbers(
+                              newHtml
+                                .split("\n")
+                                .map((_, index) => (index + 1).toString())
+                            );
+                            return false;
+                          }
+                        }
+                      }}
+                    >
+                      {code}
+                    </code>
+                  </pre>
+                </code>
               </div>
+            )}
 
-              <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
-              <input
-                className="w-full p-2 border border-primary rounded mb-4"
-                value={selectedElement?.content || ""}
-                onChange={(e) =>
-                  setSelectedElement({
-                    ...selectedElement,
-                    content: e.target.value,
-                  })
-                }
-              />
-              {Object.entries(selectedElement?.props || {}).map(
-                ([key, value]) => (
-                  <div key={key} className="mb-2">
-                    <label className="block font-bold mb-1">{key}</label>
-                    <input
-                      className="w-full p-2 border border-primary rounded"
-                      value={value}
-                      onChange={(e) => updateElement({ [key]: e.target.value })}
-                    />
-                  </div>
-                )
-              )}
+            {/* クイック編集 */}
+            <div
+              className={`properties-panel fixed top-[50px] right-0 w-[288px] h-screen overflow-auto transition-all duration-400 ease-in-out transform ${
+                selectedElement
+                  ? "translate-x-0 opacity-100 visible"
+                  : "translate-x-full opacity-0 invisible"
+              }`}
+              onClick={(e) => e.stopPropagation()} // クイック編集以外の要素クリックでクイック編集閉
+            >
+              <div className="bg-white shadow-lg rounded-lg p-4 h-full">
+                <div className="flex justify-between items-center border-b pb-3 mb-3">
+                  <h2 className="font-normal">クイック編集</h2>
+                  <button
+                    onClick={() => setSelectedElement(null)}
+                    className="text-gray-500"
+                  >
+                    <XIcon className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
+                <input
+                  className="w-full p-2 border border-primary rounded mb-4"
+                  value={selectedElement?.content || ""}
+                  onChange={(e) =>
+                    setSelectedElement({
+                      ...selectedElement,
+                      content: e.target.value,
+                    })
+                  }
+                />
+                {Object.entries(selectedElement?.props || {}).map(
+                  ([key, value]) => (
+                    <div key={key} className="mb-2">
+                      <label className="block font-bold mb-1">{key}</label>
+                      <input
+                        className="w-full p-2 border border-primary rounded"
+                        value={value}
+                        onChange={(e) =>
+                          updateElement({ [key]: e.target.value })
+                        }
+                      />
+                    </div>
+                  )
+                )}
+              </div>
             </div>
           </div>
         </div>
