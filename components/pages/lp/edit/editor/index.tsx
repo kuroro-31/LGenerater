@@ -1,16 +1,13 @@
-import 'highlight.js/styles/atom-one-dark.css';
+import "highlight.js/styles/atom-one-dark.css";
 
-import hljs from 'highlight.js';
-import { XIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import hljs from "highlight.js";
+import { XIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { Website } from '@/types/website';
-import { WebsiteElement } from '@/types/websiteElement';
-
-import DraggableComponent from './DraggableComponent';
-import DropArea from './DropArea';
+import { Website } from "@/types/website";
+import { WebsiteElement } from "@/types/websiteElement";
 
 interface EditorProps {
   website: Website;
@@ -211,22 +208,18 @@ export default function Editor({ website }: EditorProps) {
   return (
     <DndProvider backend={HTML5Backend}>
       <div
-        className="editor flex h-full mt-8"
+        className="editor flex h-full mt-[50px]"
         onClick={() => setSelectedElement(null)} // canvas-content以外要素クリックでクイック編集閉
       >
-        <div className="draggable-components w-1/5 p-4 rounded">
-          <DraggableComponent type="h1" />
-          <DraggableComponent type="p" />
-          <DraggableComponent type="img" />
-        </div>
-        <div className="canvas relative w-4/5 h-full min-h-[500px]">
+        <div className="draggable-components w-1/5 p-4 rounded"></div>
+        <div className="canvas relative w-4/5 h-full min-h-[500px] pt-8">
           <button onClick={toggleMode} className="mb-4">
             {mode === "visual"
               ? "コードモードに切り替え"
               : "ビジュアルモードに切り替え"}
           </button>
           {mode === "visual" ? (
-            <DropArea onDrop={handleDrop}>
+            <>
               <div
                 className="canvas-content w-full h-full max-w-[870px] shadow-lg rounded"
                 style={{ backgroundColor: "white" }}
@@ -247,7 +240,7 @@ export default function Editor({ website }: EditorProps) {
                   }
               `}
               </style>
-            </DropArea>
+            </>
           ) : (
             <div className="w-full h-full max-w-[870px] mb-8">
               <code className="html hljs w-full h-full flex shadow-lg rounded-lg overflow-auto">
@@ -397,11 +390,12 @@ export default function Editor({ website }: EditorProps) {
 
           {/* クイック編集 */}
           <div
-            className={`properties-panel fixed top-0 right-0 w-[288px] h-screen overflow-auto transition-all duration-400 ease-in-out transform ${
+            className={`properties-panel fixed top-[50px] right-0 w-[288px] h-screen overflow-auto transition-all duration-400 ease-in-out transform ${
               selectedElement
                 ? "translate-x-0 opacity-100 visible"
                 : "translate-x-full opacity-0 invisible"
             }`}
+            onClick={(e) => e.stopPropagation()} // クイック編集以外の要素クリックでクイック編集閉
           >
             <div className="bg-white shadow-lg rounded-lg p-4 h-full">
               <div className="flex justify-between items-center border-b pb-3 mb-3">

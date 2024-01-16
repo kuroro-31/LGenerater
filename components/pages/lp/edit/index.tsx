@@ -238,7 +238,7 @@ export default function Edit({ id }) {
 
       {/* エディタ */}
       {loading ? (
-        <div className="w-full h-[500px] flex items-center justify-center">
+        <div className="mt-[50px] w-full h-[500px] flex items-center justify-center">
           <Loading />
         </div>
       ) : (
