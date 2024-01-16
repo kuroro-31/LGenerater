@@ -210,7 +210,10 @@ export default function Editor({ website }: EditorProps) {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="editor flex h-full mt-8">
+      <div
+        className="editor flex h-full mt-8"
+        onClick={() => setSelectedElement(null)} // canvas-content以外要素クリックでクイック編集閉
+      >
         <div className="draggable-components w-1/5 p-4 rounded">
           <DraggableComponent type="h1" />
           <DraggableComponent type="p" />
@@ -228,7 +231,10 @@ export default function Editor({ website }: EditorProps) {
                 className="canvas-content w-full h-full max-w-[870px] shadow-lg rounded"
                 style={{ backgroundColor: "white" }}
                 dangerouslySetInnerHTML={{ __html: html }}
-                onClick={handleClick}
+                onClick={(e) => {
+                  e.stopPropagation(); // canvas-content以外要素クリックでクイック編集閉
+                  handleClick(e);
+                }}
                 onMouseOver={handleHover}
               />
               <style>
@@ -398,7 +404,7 @@ export default function Editor({ website }: EditorProps) {
             }`}
           >
             <div className="bg-white shadow-lg rounded-lg p-4 h-full">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center border-b pb-3 mb-3">
                 <h2 className="font-normal">クイック編集</h2>
                 <button
                   onClick={() => setSelectedElement(null)}
@@ -408,8 +414,9 @@ export default function Editor({ website }: EditorProps) {
                 </button>
               </div>
 
-              <h3>{selectedElement?.type}</h3>
-              <textarea
+              <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
+              <input
+                className="w-full p-2 border border-primary rounded mb-4"
                 value={selectedElement?.content || ""}
                 onChange={(e) =>
                   setSelectedElement({
@@ -420,9 +427,10 @@ export default function Editor({ website }: EditorProps) {
               />
               {Object.entries(selectedElement?.props || {}).map(
                 ([key, value]) => (
-                  <div key={key}>
-                    <label>{key}</label>
+                  <div key={key} className="mb-2">
+                    <label className="block font-bold mb-1">{key}</label>
                     <input
+                      className="w-full p-2 border border-primary rounded"
                       value={value}
                       onChange={(e) => updateElement({ [key]: e.target.value })}
                     />
