@@ -17,17 +17,40 @@ model User {
   email     String    @unique
   name      String?
   password  String
+  role      UserRole  @default(OPERATOR)
   websites  Website[]
 }
 
+enum UserRole {
+  DEVELOPER
+  OPERATOR
+  ADMIN
+}
+
 model Website {
-  id          Int       @id @default(autoincrement())
-  title       String
-  html        String?
-  users       User[]
-  templateId  Int?
-  template    Template?  @relation(fields: [templateId], references: [id])
-  elements    Element[]
+  id            Int            @id @default(autoincrement())
+  title         String
+  localizedHtml LocalizedHtml[]
+  users         User[]
+  templateId    Int?
+  template      Template?      @relation(fields: [templateId], references: [id])
+  elements      Element[]
+  isTemplate    Boolean        @default(false)
+}
+
+model LocalizedHtml {
+  id        Int      @id @default(autoincrement())
+  language  Language
+  content   String
+  websiteId Int
+  website   Website  @relation(fields: [websiteId], references: [id])
+}
+
+enum Language {
+  JP
+  EN
+  TW
+  CN
 }
 
 model Template {
