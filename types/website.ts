@@ -6,5 +6,18 @@
 export type Website = {
   id: number;
   title: string;
-  html: string;
+  localizedHtml: LocalizedHtml[];
 };
+
+export type LocalizedHtml = {
+  id: number;
+  language: Language;
+  content: string;
+};
+
+export enum Language {
+  JP = "JP",
+  EN = "EN",
+  TW = "TW",
+  CN = "CN",
+}
