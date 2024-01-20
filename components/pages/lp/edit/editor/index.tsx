@@ -1,13 +1,13 @@
-import "highlight.js/styles/atom-one-dark.css";
+import 'highlight.js/styles/atom-one-dark.css';
 
-import hljs from "highlight.js";
-import { XIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import hljs from 'highlight.js';
+import { XIcon } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 
-import { Website } from "@/types/website";
-import { WebsiteElement } from "@/types/websiteElement";
+import { Language, LocalizedHtml, Website } from '@/types/website';
+import { WebsiteElement } from '@/types/websiteElement';
 
 interface EditorProps {
   website: Website;
@@ -28,18 +28,31 @@ export default function Editor({ website }: EditorProps) {
   const [textAreaHeight, setTextAreaHeight] = useState<number>(0);
   const highlightPreviewRef = useRef<HTMLPreElement>(null);
   const [isComposing, setIsComposing] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(
+    Language.JP
+  );
 
   // 初期化処理
   useEffect(() => {
-    if (website.html) {
-      setComponents(parseHtmlToComponents(website.html));
+    let localizedHtml = website.localizedHtml.find(
+      (html) => html.language === selectedLanguage
+    );
+    if (!localizedHtml) {
+      localizedHtml = {
+        language: selectedLanguage,
+        content: "<p>ここにテキスト</p>",
+      };
+      website.localizedHtml.push(localizedHtml);
     }
-  }, [website.html]);
+    setComponents(parseHtmlToComponents(localizedHtml.content));
+  }, [website.localizedHtml, selectedLanguage]);
 
   // HTMLを解析してWebsiteElement配列を生成する関数
-  const parseHtmlToComponents = (htmlString: string): WebsiteElement[] => {
+  const parseHtmlToComponents = (
+    localizedHtml: LocalizedHtml
+  ): WebsiteElement[] => {
     const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, "text/html");
+    const doc = parser.parseFromString(localizedHtml.content, "text/html");
     const elements: WebsiteElement[] = [];
 
     function decodeHtml(html: string): string {
@@ -94,21 +107,54 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [components, mode]);
 
-  // HTMLが更新されたときにサーバーに送信
+  // 選択可能な言語のリスト
+  const languages = Object.values(Language);
+  // htmlとcodeの状態をLocalizedHtmlの配列に変更
+  const [localizedHtmls, setLocalizedHtmls] = useState<LocalizedHtml[]>(
+    website.localizedHtml || []
+  );
+  // 選択された言語のLocalizedHtmlを取得
+  const selectedLocalizedHtml = localizedHtmls.find(
+    (localizedHtml) => localizedHtml.language === selectedLanguage
+  );
+  // 選択された言語のHTMLを取得
+  const selectedHtml = selectedLocalizedHtml
+    ? selectedLocalizedHtml.content
+    : "";
+  // 選択された言語のHTMLを更新
+  const updateHtml = (newHtml: string) => {
+    setLocalizedHtmls(
+      localizedHtmls.map((html) =>
+        html.language === selectedLanguage
+          ? { ...html, content: newHtml }
+          : html
+      )
+    );
+  };
+  // 選択された言語のHTMLをサーバーに送信
   useEffect(() => {
-    if (html) {
+    if (selectedHtml) {
       fetch(`/api/website/update/${website.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newHtml: html }),
+        body: JSON.stringify({
+          language: selectedLanguage,
+          content: selectedHtml,
+        }),
       });
     }
-  }, [html, website.id]);
+  }, [selectedHtml, website.id, selectedLanguage]);
 
   // 行番号の更新
   useEffect(() => {
-    setLineNumbers(html.split("\n").map((_, index) => (index + 1).toString()));
-  }, [html]);
+    if (selectedLocalizedHtml && selectedLocalizedHtml.content) {
+      setLineNumbers(
+        selectedLocalizedHtml.content
+          .split("\n")
+          .map((_, index) => (index + 1).toString())
+      );
+    }
+  }, [selectedLocalizedHtml]);
 
   // モードの切り替え
   const toggleMode = () => {
@@ -125,18 +171,18 @@ export default function Editor({ website }: EditorProps) {
     } else {
       // コードモードからビジュアルモードに切り替える際には、
       // 現在のcodeからcomponentsを生成してcomponentsの状態を更新する
-      const newComponents = parseHtmlToComponents(html);
-      if (newComponents.length > 0) {
-        setComponents(newComponents);
-      } else {
-        console.error("Failed to parse HTML into components");
+      const localizedHtml = website.localizedHtml.find(
+        (html) => html.language === selectedLanguage
+      );
+      if (localizedHtml) {
+        const newComponents = parseHtmlToComponents(localizedHtml);
+        if (newComponents.length > 0) {
+          setComponents(newComponents);
+        } else {
+          console.error("Failed to parse HTML into components");
+        }
       }
     }
-  };
-
-  // ドロップハンドラー
-  const handleDrop = (item: WebsiteElement) => {
-    setComponents([...components, item]);
   };
 
   // codeが変更されるたびにハイライトを適用
@@ -259,15 +305,36 @@ export default function Editor({ website }: EditorProps) {
 
         <div className="canvas relative w-full flex flex-col items-center min-h-[500px] pt-8">
           <div>
-            <button onClick={toggleMode} className="mb-4">
-              {mode === "visual"
-                ? "コードモードに切り替え"
-                : "ビジュアルモードに切り替え"}
-            </button>
+            <div className="flex justify-between mb-4">
+              {/* 言語切り替えトグル */}
+              <div>
+                {languages.map((language) => (
+                  <button
+                    key={language}
+                    onClick={() => setSelectedLanguage(language)}
+                    className={
+                      selectedLanguage === language
+                        ? "border border-primary text-primary mr-2 px-4 py-1 rounded-full"
+                        : "border mr-2 px-4 py-1 rounded-full"
+                    }
+                  >
+                    {language}
+                  </button>
+                ))}
+              </div>
+
+              {/* モード切り替え */}
+              <button onClick={toggleMode} className="mb-4">
+                {mode === "visual"
+                  ? "コードモードに切り替え"
+                  : "ビジュアルモードに切り替え"}
+              </button>
+            </div>
+
             {mode === "visual" ? (
               <>
                 <div
-                  className="canvas-content w-full h-full max-w-[870px] shadow-lg rounded"
+                  className="canvas-content w-full h-full min-w-[870px] max-w-[870px] min-h-[400px] shadow-lg rounded"
                   style={{ backgroundColor: "white" }}
                   dangerouslySetInnerHTML={{ __html: html }}
                   onClick={(e) => {
@@ -288,10 +355,10 @@ export default function Editor({ website }: EditorProps) {
                 </style>
               </>
             ) : (
-              <div className="w-full h-full max-w-[870px] mb-8">
+              <div className="w-full h-full min-w-[870px] max-w-[870px] mb-8">
                 <code className="html hljs w-full h-full flex shadow-lg rounded-lg overflow-auto">
                   {/* 行番号 */}
-                  <pre className="py-4">
+                  <pre className="py-4 flex flex-col items-center">
                     {lineNumbers.map((number, index) => (
                       <div key={index} className="text-right min-w-[1.5em]">
                         {number}
@@ -300,10 +367,10 @@ export default function Editor({ website }: EditorProps) {
                   </pre>
 
                   {/* コードの編集 */}
-                  <pre>
-                    <code
+                  <pre className="w-full p-4">
+                    <div
                       contentEditable
-                      className="html outline-none"
+                      className="html outline-none w-full h-full"
                       ref={textAreaRef}
                       onCompositionStart={(e) => {
                         setIsComposing(true);
@@ -321,6 +388,14 @@ export default function Editor({ website }: EditorProps) {
                       onInput={(e) => {
                         if (!isComposing) {
                           let newHtml = (e.target as HTMLElement).innerText;
+
+                          // 選択された言語のHTMLを更新
+                          const localizedHtml = website.localizedHtml.find(
+                            (html) => html.language === selectedLanguage
+                          );
+                          if (localizedHtml) {
+                            localizedHtml.content = newHtml;
+                          }
 
                           setHtml(newHtml);
                           setCode(newHtml);
@@ -428,7 +503,7 @@ export default function Editor({ website }: EditorProps) {
                       }}
                     >
                       {code}
-                    </code>
+                    </div>
                   </pre>
                 </code>
               </div>

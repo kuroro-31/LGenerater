@@ -1,14 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import EditHeader from "@/components/header/edit";
-import Loading from "@/components/loading";
-import { Website } from "@/types/website";
+import EditHeader from '@/components/header/edit';
+import Loading from '@/components/loading';
+import { Website } from '@/types/website';
 
-import Editor from "./editor";
+import Editor from './editor';
 
 export default function Edit({ id }) {
   const router = useRouter();
@@ -73,7 +73,7 @@ export default function Edit({ id }) {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  // IDからウェブサイトを更新する
+  // IDからタイトルを更新する
   const updateWebsiteTitle = async (newTitle: string) => {
     setSaving(true); // 保存を開始
     const response = await fetch(`/api/website/update/${id}`, {
@@ -97,11 +97,18 @@ export default function Edit({ id }) {
   };
 
   // ダウンロード機能
-  const handleDownload = () => {
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
+  const handleDownload = (lang: string) => {
     const element = document.createElement("a");
-    const file = new Blob([website?.html || ""], { type: "text/html" });
+    const file = new Blob(
+      [
+        website?.localizedHtml.find((html) => html.language === lang)
+          ?.content || "",
+      ],
+      { type: "text/html" }
+    );
     element.href = URL.createObjectURL(file);
-    element.download = `${website?.title || "website"}.html`;
+    element.download = "index.html";
     document.body.appendChild(element);
     element.click();
   };
@@ -109,7 +116,7 @@ export default function Edit({ id }) {
   return (
     <div className="relative min-h-screen">
       {isModalOpen && (
-        <div className="w-full min-h-screen max-h-screen absolute z-[100] top-0 left-0 p-4 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="w-full min-h-screen max-h-screen fixed z-[100] top-0 left-0 right-0 bottom-0 p-4 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6">
             <div className="text-lg">本当に削除してもよろしいですか？</div>
             <div className="flex justify-end mt-6">
@@ -123,6 +130,32 @@ export default function Edit({ id }) {
                 キャンセル
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isDownloadModalOpen && (
+        <div className="w-full min-h-screen max-h-screen fixed z-[100] top-0 left-0 right-0 bottom-0 p-4 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg p-6">
+            <div className="text-lg">
+              どの言語のHTMLをダウンロードしますか？
+            </div>
+            <div className="flex justify-around mt-6">
+              {["JP", "EN", "TW", "CN"].map((lang) => (
+                <button
+                  onClick={() => handleDownload(lang)}
+                  className="text-primary border border-primary rounded-lg px-6 py-2 outline-none"
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => setIsDownloadModalOpen(false)}
+              className="mt-4"
+            >
+              キャンセル
+            </button>
           </div>
         </div>
       )}
@@ -228,7 +261,7 @@ export default function Edit({ id }) {
             プレビュー
           </Link>
           <button
-            onClick={handleDownload}
+            onClick={() => setIsDownloadModalOpen(true)}
             className="ml-6 bg-primary text-white px-4 py-2 rounded-full text-[13px]"
           >
             ダウンロード

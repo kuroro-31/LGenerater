@@ -3,9 +3,9 @@
 | IDからウェブサイトを取得する
 |--------------------------------------------------------------------------
 */
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from 'next';
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -22,7 +22,12 @@ export default async function handle(
     select: {
       id: true,
       title: true, // タイトル
-      html: true, // HTML
+      localizedHtml: {
+        select: {
+          language: true,
+          content: true, // HTML
+        },
+      },
     },
   });
 

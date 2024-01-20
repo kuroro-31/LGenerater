@@ -44,6 +44,8 @@ model LocalizedHtml {
   content   String
   websiteId Int
   website   Website  @relation(fields: [websiteId], references: [id])
+
+  @@unique([websiteId, language])
 }
 
 enum Language {
