@@ -56,7 +56,7 @@ export default function Editor({ website }: EditorProps) {
       // 対応する言語のエントリが存在しない場合、デフォルトのコンテンツを持つ新しいエントリを追加
       const newLocalizedHtml = {
         language: selectedLanguage,
-        content: "<p>ここにテキスト</p>",
+        content: "",
       };
       setLocalizedHtmls([...localizedHtmls, newLocalizedHtml]);
     } else {
@@ -114,12 +114,14 @@ export default function Editor({ website }: EditorProps) {
         if (component.type === "img") {
           return `<img src="${component.props.src || "/noimage.png"}" />`;
         } else {
-          const props = Object.entries(component.props)
-            .map(([key, value]) => `${key}="${value}"`)
-            .join(" ");
-          return `<${component.type} ${props}>${
-            component.content || "ここにテキスト"
-          }</${component.type}>`;
+          const props = component.props
+            ? Object.entries(component.props)
+                .map(([key, value]) => `${key}="${value}"`)
+                .join(" ")
+            : "";
+          return `<${component.type} ${props}>${component.content || ""}</${
+            component.type
+          }>`;
         }
       })
       .join("");
@@ -278,7 +280,9 @@ export default function Editor({ website }: EditorProps) {
     const element = e.target as HTMLElement;
 
     // 直接hoverされた要素にhoverスタイルを適用
-    element.classList.add("hover-style");
+    if (!element.classList.contains("canvas-content")) {
+      element.classList.add("hover-style");
+    }
   };
 
   const updateElement = (newProps: { [key: string]: any }) => {
@@ -363,7 +367,7 @@ export default function Editor({ website }: EditorProps) {
         </div> */}
 
         <div className="canvas relative w-full flex flex-col items-center min-h-[500px] pt-8">
-          <div>
+          <div className="mb-12">
             <div className="flex justify-between mb-4">
               {/* 言語切り替えトグル */}
               <div>
@@ -393,7 +397,7 @@ export default function Editor({ website }: EditorProps) {
             {mode === "visual" ? (
               <>
                 <div
-                  className="canvas-content w-full h-full min-w-[870px] max-w-[870px] min-h-[400px] shadow-lg rounded"
+                  className="canvas-content w-full min-w-[870px] max-w-[870px] min-h-[400px] shadow-lg rounded"
                   style={{ backgroundColor: "white" }}
                   dangerouslySetInnerHTML={{ __html: html }}
                   onClick={(e) => {
