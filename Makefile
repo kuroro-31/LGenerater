@@ -31,6 +31,8 @@ d-stats:
 	docker stats
 d-exec:
 	docker-compose exec app bash
+d-log:
+	docker-compose logs -f 2>&1 | tee logs.txt
 migrate:
 	docker-compose exec app npx prisma migrate dev && docker-compose exec app npx prisma generate
 studio:

@@ -8,13 +8,17 @@ export default async function handle(
   const { id } = req.query;
   const { title, language, content } = req.body;
 
+  if (typeof language === "undefined" || typeof content === "undefined") {
+    return res.status(400).json({ error: "language or content is undefined" });
+  }
+
   // Update the website
   const website = await prisma.website.update({
     where: { id: Number(id) },
     data: { title: title },
   });
 
-  // Update or create the localizedHtml
+  // Find or create the LocalizedHtml record
   const localizedHtml = await prisma.localizedHtml.upsert({
     where: {
       websiteId_language: {

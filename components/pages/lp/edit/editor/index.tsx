@@ -31,21 +31,46 @@ export default function Editor({ website }: EditorProps) {
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(
     Language.JP
   );
+  const [localizedHtmls, setLocalizedHtmls] = useState<LocalizedHtml[]>(
+    website.localizedHtml || []
+  ); // htmlとcodeの状態をLocalizedHtmlの配列に変更
+  const languages = Object.values(Language); // 選択可能な言語のリスト
+  const selectedLocalizedHtml = localizedHtmls.find(
+    (localizedHtml) => localizedHtml.language === selectedLanguage
+  ); // 選択された言語のLocalizedHtmlを取得
+  const selectedHtml = selectedLocalizedHtml
+    ? selectedLocalizedHtml.content
+    : ""; // 選択された言語のHTMLを取得
+  const [selectedElement, setSelectedElement] = useState<WebsiteElement | null>(
+    null
+  );
 
   // 初期化処理
   useEffect(() => {
-    let localizedHtml = website.localizedHtml.find(
+    // 選択された言語のLocalizedHtmlが存在するか確認し、存在しなければ初期化
+    const existingLocalizedHtml = localizedHtmls.find(
       (html) => html.language === selectedLanguage
     );
-    if (!localizedHtml) {
-      localizedHtml = {
+
+    if (!existingLocalizedHtml) {
+      // 対応する言語のエントリが存在しない場合、デフォルトのコンテンツを持つ新しいエントリを追加
+      const newLocalizedHtml = {
         language: selectedLanguage,
         content: "<p>ここにテキスト</p>",
       };
-      website.localizedHtml.push(localizedHtml);
+      setLocalizedHtmls([...localizedHtmls, newLocalizedHtml]);
+    } else {
+      // 既存のLocalizedHtmlがある場合、ビジュアルモードで表示するHTMLを設定
+      setHtml(existingLocalizedHtml.content);
     }
-    setComponents(parseHtmlToComponents(localizedHtml.content));
-  }, [website.localizedHtml, selectedLanguage]);
+  }, [selectedLanguage, localizedHtmls]);
+
+  useEffect(() => {
+    // モードがビジュアルの場合、選択された言語のHTMLをビジュアル表示用に設定
+    if (mode === "visual" && selectedLocalizedHtml) {
+      setHtml(selectedLocalizedHtml.content);
+    }
+  }, [mode, selectedLanguage, localizedHtmls, selectedLocalizedHtml]);
 
   // HTMLを解析してWebsiteElement配列を生成する関数
   const parseHtmlToComponents = (
@@ -107,20 +132,6 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [components, mode]);
 
-  // 選択可能な言語のリスト
-  const languages = Object.values(Language);
-  // htmlとcodeの状態をLocalizedHtmlの配列に変更
-  const [localizedHtmls, setLocalizedHtmls] = useState<LocalizedHtml[]>(
-    website.localizedHtml || []
-  );
-  // 選択された言語のLocalizedHtmlを取得
-  const selectedLocalizedHtml = localizedHtmls.find(
-    (localizedHtml) => localizedHtml.language === selectedLanguage
-  );
-  // 選択された言語のHTMLを取得
-  const selectedHtml = selectedLocalizedHtml
-    ? selectedLocalizedHtml.content
-    : "";
   // 選択された言語のHTMLを更新
   const updateHtml = (newHtml: string) => {
     setLocalizedHtmls(
@@ -133,7 +144,8 @@ export default function Editor({ website }: EditorProps) {
   };
   // 選択された言語のHTMLをサーバーに送信
   useEffect(() => {
-    if (selectedHtml) {
+    if (selectedHtml && selectedLanguage) {
+      // selectedHtml と selectedLanguage が undefined でないことを確認
       fetch(`/api/website/update/${website.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -141,7 +153,19 @@ export default function Editor({ website }: EditorProps) {
           language: selectedLanguage,
           content: selectedHtml,
         }),
-      });
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Success:", data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
     }
   }, [selectedHtml, website.id, selectedLanguage]);
 
@@ -162,16 +186,9 @@ export default function Editor({ website }: EditorProps) {
     setMode(newMode);
 
     if (newMode === "code") {
-      // ビジュアルモードからコードモードに切り替える際には、
-      // componentsからHTMLを生成してcodeとhtmlの状態を更新する
-      const newHtml =
-        components.length > 0 ? generateHtmlFromComponents(components) : html;
-      setHtml(newHtml);
-      setCode(newHtml);
-    } else {
       // コードモードからビジュアルモードに切り替える際には、
       // 現在のcodeからcomponentsを生成してcomponentsの状態を更新する
-      const localizedHtml = website.localizedHtml.find(
+      const localizedHtml = localizedHtmls.find(
         (html) => html.language === selectedLanguage
       );
       if (localizedHtml) {
@@ -182,8 +199,33 @@ export default function Editor({ website }: EditorProps) {
           console.error("Failed to parse HTML into components");
         }
       }
+      const newHtml = localizedHtml ? localizedHtml.content : "";
+      setHtml(newHtml);
+      setCode(newHtml);
+    } else {
+      // ビジュアルモードへの切り替えロジック
+      const localizedHtml = localizedHtmls.find(
+        (html) => html.language === selectedLanguage
+      );
+      if (localizedHtml) {
+        setHtml(localizedHtml.content);
+      }
     }
   };
+
+  useEffect(() => {
+    if (mode === "code") {
+      // 選択された言語のHTMLコンテンツをcodeステートに設定
+      const currentLocalizedHtml = localizedHtmls.find(
+        (html) => html.language === selectedLanguage
+      );
+      if (currentLocalizedHtml) {
+        setCode(currentLocalizedHtml.content);
+      } else {
+        setCode(""); // 選択された言語のHTMLコンテンツがない場合は空にする
+      }
+    }
+  }, [mode, selectedLanguage, localizedHtmls]);
 
   // codeが変更されるたびにハイライトを適用
   useEffect(() => {
@@ -210,9 +252,6 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [html, cursorPosition]); // cursorPositionを依存配列に追加
 
-  const [selectedElement, setSelectedElement] = useState<WebsiteElement | null>(
-    null
-  );
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     e.preventDefault(); // デフォルトの挙動をキャンセル
@@ -250,6 +289,26 @@ export default function Editor({ website }: EditorProps) {
       });
     }
   };
+
+  const handleLanguageChange = (language) => {
+    console.log(`言語が ${language} に切り替わりました。`);
+    setSelectedLanguage(language);
+
+    // 選択された言語に対応するHTMLコンテンツを取得してログ出力
+    const localizedHtml = website.localizedHtml.find(
+      (html) => html.language === language
+    );
+    if (localizedHtml) {
+      console.log(`新しいHTMLコンテンツ: ${localizedHtml.content}`);
+    } else {
+      console.log("この言語に対応するHTMLコンテンツが見つかりません。");
+    }
+  };
+
+  // ローカライズされたHTMLを更新
+  useEffect(() => {
+    setLocalizedHtmls(website.localizedHtml || []);
+  }, [website.localizedHtml]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -311,7 +370,7 @@ export default function Editor({ website }: EditorProps) {
                 {languages.map((language) => (
                   <button
                     key={language}
-                    onClick={() => setSelectedLanguage(language)}
+                    onClick={() => handleLanguageChange(language)}
                     className={
                       selectedLanguage === language
                         ? "border border-primary text-primary mr-2 px-4 py-1 rounded-full"
@@ -453,13 +512,16 @@ export default function Editor({ website }: EditorProps) {
 
                               // 生成したHTMLをサーバーに送信
                               // htmlが空でない場合のみ送信
-                              if (newHtml) {
+                              if (newHtml && selectedLanguage) {
                                 fetch(`/api/website/update/${website.id}`, {
                                   method: "POST",
                                   headers: {
                                     "Content-Type": "application/json",
                                   },
-                                  body: JSON.stringify({ html: newHtml }),
+                                  body: JSON.stringify({
+                                    language: selectedLanguage,
+                                    content: newHtml,
+                                  }),
                                 });
                               }
                             } catch (error) {
