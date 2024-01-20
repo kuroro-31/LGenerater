@@ -188,29 +188,30 @@ export default function Editor({ website }: EditorProps) {
     setMode(newMode);
 
     if (newMode === "code") {
-      // コードモードからビジュアルモードに切り替える際には、
-      // 現在のcodeからcomponentsを生成してcomponentsの状態を更新する
-      const localizedHtml = localizedHtmls.find(
+      // コードモードへの切り替えロジック
+      const currentLocalizedHtml = localizedHtmls.find(
         (html) => html.language === selectedLanguage
       );
-      if (localizedHtml) {
-        const newComponents = parseHtmlToComponents(localizedHtml);
-        if (newComponents.length > 0) {
-          setComponents(newComponents);
-        } else {
-          console.error("Failed to parse HTML into components");
-        }
+      if (currentLocalizedHtml) {
+        setCode(currentLocalizedHtml.content);
       }
-      const newHtml = localizedHtml ? localizedHtml.content : "";
-      setHtml(newHtml);
-      setCode(newHtml);
     } else {
       // ビジュアルモードへの切り替えロジック
-      const localizedHtml = localizedHtmls.find(
+      // コードモードでの変更をlocalizedHtmlsに反映
+      const updatedLocalizedHtmls = localizedHtmls.map((localizedHtml) => {
+        if (localizedHtml.language === selectedLanguage) {
+          return { ...localizedHtml, content: code };
+        }
+        return localizedHtml;
+      });
+      setLocalizedHtmls(updatedLocalizedHtmls);
+
+      // 更新されたlocalizedHtmlsを使用してビジュアルモードのHTMLを設定
+      const updatedLocalizedHtml = updatedLocalizedHtmls.find(
         (html) => html.language === selectedLanguage
       );
-      if (localizedHtml) {
-        setHtml(localizedHtml.content);
+      if (updatedLocalizedHtml) {
+        setHtml(updatedLocalizedHtml.content);
       }
     }
   };
