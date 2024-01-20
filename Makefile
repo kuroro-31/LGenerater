@@ -45,3 +45,7 @@ check-3000: # 3000を使ってる環境のチェック
 	lsof -i :3000
 kill-9: # 3000を使ってる環境のチェック
 	 kill -9 〇〇
+backup-db: # バックアップ
+	 docker-compose exec db pg_dump -U user mydb > prisma/backups/backup_$(date +%Y-%m-%d_%H%M%S).sql
+restore-db: # データベースを復元
+	docker-compose exec -T db psql -U user -d mydb -f /path/to/backup/file.sql
