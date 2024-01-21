@@ -77,6 +77,9 @@ export default function Editor({ website }: EditorProps) {
     const localizedHtml = website.localizedHtml.find(
       (html) => html.language === language
     );
+    if (localizedHtml) {
+      setCode(localizedHtml.content);
+    }
   };
 
   // モードの切り替え
@@ -91,6 +94,12 @@ export default function Editor({ website }: EditorProps) {
       );
       if (currentLocalizedHtml) {
         setCode(currentLocalizedHtml.content);
+        // ハイライトを適用するために、コードを更新
+        setTimeout(() => {
+          document.querySelectorAll("pre code").forEach((block) => {
+            hljs.highlightBlock(block as HTMLElement);
+          });
+        }, 0);
       }
     } else {
       // ビジュアルモードへの切り替えロジック
@@ -265,6 +274,20 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [mode, selectedLanguage, localizedHtmls]);
 
+  // codeステートが更新された場合にハイライトを適用
+  useEffect(() => {
+    if (mode === "code") {
+      // 次のフレームでハイライト処理を実行する
+      requestAnimationFrame(() => {
+        document.querySelectorAll("pre code").forEach((block) => {
+          // ハイライトが既に適用されている場合はリセットする
+          block.removeAttribute("data-highlighted");
+          hljs.highlightBlock(block as HTMLElement);
+        });
+      });
+    }
+  }, [code, mode]);
+
   // 行番号の更新
   useEffect(() => {
     if (selectedLocalizedHtml && selectedLocalizedHtml.content) {
@@ -279,7 +302,7 @@ export default function Editor({ website }: EditorProps) {
   // 変更されるたびにハイライトを適用
   useEffect(() => {
     document.querySelectorAll("pre code").forEach((block) => {
-      hljs.highlightBlock(block);
+      hljs.highlightBlock(block as HTMLElement);
     });
   }, [code]);
 
@@ -308,6 +331,11 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [selectedHtml, selectedLanguage, sendUpdateToServer]);
 
+  /*
+  |--------------------------------------------------------------------------
+  |HTML
+  --------------------------------------------------------------------------
+  */
   return (
     <DndProvider backend={HTML5Backend}>
       <div
@@ -424,8 +452,8 @@ export default function Editor({ website }: EditorProps) {
                   </pre>
 
                   {/* コードの編集 */}
-                  <pre className="w-full p-4">
-                    <div
+                  <pre className="w-full">
+                    <code
                       contentEditable
                       className="html outline-none w-full h-full"
                       ref={textAreaRef}
@@ -563,7 +591,7 @@ export default function Editor({ website }: EditorProps) {
                       }}
                     >
                       {code}
-                    </div>
+                    </code>
                   </pre>
                 </code>
               </div>
