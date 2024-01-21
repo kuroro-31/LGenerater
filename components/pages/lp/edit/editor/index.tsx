@@ -18,7 +18,7 @@ export default function Editor({ website }: EditorProps) {
   const [html, setHtml] = useState<string>(website.html);
   const [mode, setMode] = useState<"visual" | "code">("visual");
   const [code, setCode] = useState("");
-  const [cursorPosition, setCursorPosition] = useState(0); // カーソル位置を数値で保存
+  const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [lineNumbers, setLineNumbers] = useState<string[]>([]);
   const [highlightedCodeWithCursor, setHighlightedCodeWithCursor] = useState({
     __html: "",
@@ -306,23 +306,45 @@ export default function Editor({ website }: EditorProps) {
     });
   }, [code]);
 
-  // カーソル位置を復元
-  useEffect(() => {
-    if (
-      textAreaRef.current &&
-      textAreaRef.current.childNodes[0] && // 子ノードが存在することを確認
-      cursorPosition !== undefined
-    ) {
-      const range = document.createRange();
-      const sel = window.getSelection();
-      const node = textAreaRef.current.childNodes[0];
-      const position = Math.min(cursorPosition, node.length); // カーソル位置がノードの長さを超えないようにする
-      range.setStart(node, position);
-      range.collapse(true);
-      sel.removeAllRanges();
-      sel.addRange(range);
+  // カーソル位置を復元する関数
+  const restoreCursorPosition = useCallback(() => {
+    if (cursorPosition !== null && textAreaRef.current) {
+      const textArea = textAreaRef.current;
+      const node = textArea.firstChild;
+
+      if (node) {
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.setStart(node, Math.min(cursorPosition, node.textContent.length));
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
     }
-  }, [html, cursorPosition]); // cursorPositionを依存配列に追加
+  }, [cursorPosition, textAreaRef]);
+
+  // カーソル位置を保存し、ステートを更新する関数
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    const newHtml = target.innerText;
+
+    // カーソル位置を保存
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      setCursorPosition(range.startOffset);
+    }
+
+    // ステートを更新
+    setHtml(newHtml);
+    setCode(newHtml);
+  };
+
+  // カーソル位置を復元するuseEffect
+  useEffect(() => {
+    // ステートの更新がDOMに反映された後にカーソル位置を復元
+    requestAnimationFrame(restoreCursorPosition);
+  }, [cursorPosition, restoreCursorPosition]);
 
   // 選択された言語のHTMLをサーバーに送信
   useEffect(() => {
