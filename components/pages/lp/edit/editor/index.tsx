@@ -2,7 +2,7 @@ import 'highlight.js/styles/atom-one-dark.css';
 
 import hljs from 'highlight.js';
 import { XIcon } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
@@ -45,6 +45,11 @@ export default function Editor({ website }: EditorProps) {
     null
   );
 
+  /*
+  |--------------------------------------------------------------------------
+  |共通処理
+  --------------------------------------------------------------------------
+  */
   // 初期化処理
   useEffect(() => {
     // 選択された言語のLocalizedHtmlが存在するか確認し、存在しなければ初期化
@@ -65,122 +70,14 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [selectedLanguage, localizedHtmls]);
 
-  useEffect(() => {
-    // モードがビジュアルの場合、選択された言語のHTMLをビジュアル表示用に設定
-    if (mode === "visual" && selectedLocalizedHtml) {
-      setHtml(selectedLocalizedHtml.content);
-    }
-  }, [mode, selectedLanguage, localizedHtmls, selectedLocalizedHtml]);
-
-  // HTMLを解析してWebsiteElement配列を生成する関数
-  const parseHtmlToComponents = (
-    localizedHtml: LocalizedHtml
-  ): WebsiteElement[] => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(localizedHtml.content, "text/html");
-    const elements: WebsiteElement[] = [];
-
-    function decodeHtml(html: string): string {
-      const txt = document.createElement("textarea");
-      txt.innerHTML = html;
-      return txt.value;
-    }
-
-    function parseElement(element: Element): WebsiteElement {
-      return {
-        type: element.tagName.toLowerCase(),
-        props: Array.from(element.attributes).reduce((acc, attr) => {
-          acc[attr.name] = attr.value;
-          return acc;
-        }, {}),
-        content: decodeHtml(element.innerHTML), // HTMLエンティティをデコード
-        children: Array.from(element.children).map(parseElement),
-      };
-    }
-
-    doc.body.childNodes.forEach((node) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        elements.push(parseElement(node as Element));
-      }
-    });
-
-    return elements;
-  };
-
-  // WebsiteElement配列からHTML文字列を生成する関数
-  const generateHtmlFromComponents = (elements: WebsiteElement[]): string => {
-    return elements
-      .map((component) => {
-        if (component.type === "img") {
-          return `<img src="${component.props.src || "/noimage.png"}" />`;
-        } else {
-          const props = component.props
-            ? Object.entries(component.props)
-                .map(([key, value]) => `${key}="${value}"`)
-                .join(" ")
-            : "";
-          return `<${component.type} ${props}>${component.content || ""}</${
-            component.type
-          }>`;
-        }
-      })
-      .join("");
-  };
-
-  // componentsが更新されたときにHTMLを生成
-  useEffect(() => {
-    if (components.length && mode === "visual") {
-      setHtml(generateHtmlFromComponents(components));
-    }
-  }, [components, mode]);
-
-  // 選択された言語のHTMLを更新
-  const updateHtml = (newHtml: string) => {
-    setLocalizedHtmls(
-      localizedHtmls.map((html) =>
-        html.language === selectedLanguage
-          ? { ...html, content: newHtml }
-          : html
-      )
+  // 言語切り替え
+  const handleLanguageChange = (language: Language) => {
+    setSelectedLanguage(language);
+    // 選択された言語に対応するHTMLコンテンツを取得してログ出力
+    const localizedHtml = website.localizedHtml.find(
+      (html) => html.language === language
     );
   };
-  // 選択された言語のHTMLをサーバーに送信
-  useEffect(() => {
-    if (selectedHtml && selectedLanguage) {
-      // selectedHtml と selectedLanguage が undefined でないことを確認
-      fetch(`/api/website/update/${website.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          language: selectedLanguage,
-          content: selectedHtml,
-        }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Success:", data);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
-    }
-  }, [selectedHtml, website.id, selectedLanguage]);
-
-  // 行番号の更新
-  useEffect(() => {
-    if (selectedLocalizedHtml && selectedLocalizedHtml.content) {
-      setLineNumbers(
-        selectedLocalizedHtml.content
-          .split("\n")
-          .map((_, index) => (index + 1).toString())
-      );
-    }
-  }, [selectedLocalizedHtml]);
 
   // モードの切り替え
   const toggleMode = () => {
@@ -216,6 +113,144 @@ export default function Editor({ website }: EditorProps) {
     }
   };
 
+  /*
+  |--------------------------------------------------------------------------
+  |ビジュアルモード
+  --------------------------------------------------------------------------
+  */
+  // モードがビジュアルの場合、選択された言語のHTMLをビジュアル表示用に設定
+  useEffect(() => {
+    if (mode === "visual" && selectedLocalizedHtml) {
+      setHtml(selectedLocalizedHtml.content);
+    }
+  }, [mode, selectedLanguage, localizedHtmls, selectedLocalizedHtml]);
+
+  // componentsが更新されたときにHTMLを生成
+  useEffect(() => {
+    if (components.length && mode === "visual") {
+      setHtml(generateHtmlFromComponents(components));
+    }
+  }, [components, mode]);
+
+  // ローカライズされたHTMLを更新
+  useEffect(() => {
+    setLocalizedHtmls(website.localizedHtml || []);
+  }, [website.localizedHtml]);
+
+  // WebsiteElement配列からHTML文字列を生成する関数
+  const generateHtmlFromComponents = (elements: WebsiteElement[]): string => {
+    return elements
+      .map((component) => {
+        if (component.type === "img") {
+          return `<img src="${component.props.src || "/noimage.png"}" />`;
+        } else {
+          const props = component.props
+            ? Object.entries(component.props)
+                .map(([key, value]) => `${key}="${value}"`)
+                .join(" ")
+            : "";
+          return `<${component.type} ${props}>${component.content || ""}</${
+            component.type
+          }>`;
+        }
+      })
+      .join("");
+  };
+
+  // ビジュアルモードで要素をクリックしたときにクイック編集を開始
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    e.preventDefault(); // デフォルトの挙動をキャンセル
+    const element = e.target as HTMLElement;
+
+    setSelectedElement({
+      type: element.tagName.toLowerCase(),
+      props: Array.from(element.attributes).reduce((acc, attr) => {
+        acc[attr.name] = attr.value;
+        return acc;
+      }, {}),
+      content: element.innerHTML,
+    });
+  };
+
+  // ビジュアルモードで要素にhoverしたときにhoverスタイルを適用
+  const handleHover = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    // すべての要素からhoverスタイルを削除
+    document.querySelectorAll(".hover-style").forEach((el) => {
+      el.classList.remove("hover-style");
+    });
+
+    const element = e.target as HTMLElement;
+
+    // 直接hoverされた要素にhoverスタイルを適用
+    if (!element.classList.contains("canvas-content")) {
+      element.classList.add("hover-style");
+    }
+  };
+
+  // クイック編集でプロパティを更新する関数
+  const updateElement = (newProps: { [key: string]: any }) => {
+    if (selectedElement) {
+      // 新しいプロパティでselectedElementを更新
+      const updatedElement = {
+        ...selectedElement,
+        props: { ...selectedElement.props, ...newProps },
+      };
+      setSelectedElement(updatedElement);
+
+      // サーバーに送信するためのHTMLを生成
+      const newHtml = generateHtmlWithUpdatedElement(updatedElement);
+
+      // サーバーに更新を送信
+      sendUpdateToServer(newHtml);
+    }
+  };
+
+  // HTMLを生成する関数（ダミーの実装）
+  const generateHtmlWithUpdatedElement = (
+    updatedElement: WebsiteElement
+  ): string => {
+    // ここでupdatedElementを元に新しいHTMLを生成する処理を実装する
+    return "";
+  };
+
+  // サーバーに更新を送信する関数
+  const sendUpdateToServer = useCallback(
+    (html: string) => {
+      fetch(`/api/website/update/${website.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language: selectedLanguage,
+          content: html,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          console.log("Success:", data);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    },
+    [selectedLanguage, website.id]
+  );
+
+  /*
+  |--------------------------------------------------------------------------
+  |コードモード
+  --------------------------------------------------------------------------
+  */
+  // ローカライズされたHTMLをcodeステートに設定
   useEffect(() => {
     if (mode === "code") {
       // 選択された言語のHTMLコンテンツをcodeステートに設定
@@ -230,7 +265,18 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [mode, selectedLanguage, localizedHtmls]);
 
-  // codeが変更されるたびにハイライトを適用
+  // 行番号の更新
+  useEffect(() => {
+    if (selectedLocalizedHtml && selectedLocalizedHtml.content) {
+      setLineNumbers(
+        selectedLocalizedHtml.content
+          .split("\n")
+          .map((_, index) => (index + 1).toString())
+      );
+    }
+  }, [selectedLocalizedHtml]);
+
+  // 変更されるたびにハイライトを適用
   useEffect(() => {
     document.querySelectorAll("pre code").forEach((block) => {
       hljs.highlightBlock(block);
@@ -255,65 +301,12 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [html, cursorPosition]); // cursorPositionを依存配列に追加
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-    e.preventDefault(); // デフォルトの挙動をキャンセル
-    const element = e.target as HTMLElement;
-
-    setSelectedElement({
-      type: element.tagName.toLowerCase(),
-      props: Array.from(element.attributes).reduce((acc, attr) => {
-        acc[attr.name] = attr.value;
-        return acc;
-      }, {}),
-      content: element.innerHTML,
-    });
-  };
-
-  const handleHover = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.stopPropagation();
-
-    // すべての要素からhoverスタイルを削除
-    document.querySelectorAll(".hover-style").forEach((el) => {
-      el.classList.remove("hover-style");
-    });
-
-    const element = e.target as HTMLElement;
-
-    // 直接hoverされた要素にhoverスタイルを適用
-    if (!element.classList.contains("canvas-content")) {
-      element.classList.add("hover-style");
-    }
-  };
-
-  const updateElement = (newProps: { [key: string]: any }) => {
-    if (selectedElement) {
-      setSelectedElement({
-        ...selectedElement,
-        props: { ...selectedElement.props, ...newProps },
-      });
-    }
-  };
-
-  const handleLanguageChange = (language) => {
-    console.log(`言語が ${language} に切り替わりました。`);
-    setSelectedLanguage(language);
-
-    // 選択された言語に対応するHTMLコンテンツを取得してログ出力
-    const localizedHtml = website.localizedHtml.find(
-      (html) => html.language === language
-    );
-    if (localizedHtml) {
-      console.log(`新しいHTMLコンテンツ: ${localizedHtml.content}`);
-    } else {
-      console.log("この言語に対応するHTMLコンテンツが見つかりません。");
-    }
-  };
-
-  // ローカライズされたHTMLを更新
+  // 選択された言語のHTMLをサーバーに送信
   useEffect(() => {
-    setLocalizedHtmls(website.localizedHtml || []);
-  }, [website.localizedHtml]);
+    if (selectedHtml && selectedLanguage) {
+      sendUpdateToServer(selectedHtml);
+    }
+  }, [selectedHtml, selectedLanguage, sendUpdateToServer]);
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -585,7 +578,7 @@ export default function Editor({ website }: EditorProps) {
               }`}
               onClick={(e) => e.stopPropagation()} // クイック編集以外の要素クリックでクイック編集閉
             >
-              <div className="bg-white shadow-lg rounded-lg p-4 h-full">
+              <div className="bg-white shadow-lg p-4 h-full">
                 <div className="flex justify-between items-center border-b pb-3 mb-3">
                   <h2 className="font-normal">クイック編集</h2>
                   <button

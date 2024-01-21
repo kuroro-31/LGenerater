@@ -5,11 +5,11 @@
 */
 "use client";
 
-import axios from "axios";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import axios from 'axios';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const Header = () => {
   const router = useRouter();
@@ -54,7 +54,7 @@ const Header = () => {
             {isLoggedIn && (
               <div>
                 <button className="btn text-sm" onClick={createWebsite}>
-                  LPを作成
+                  新しく作成
                 </button>
                 <button onClick={handleLogout} className="btn-border text-sm">
                   ログアウト

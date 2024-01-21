@@ -5,15 +5,15 @@
 */
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import Footer from "@/components/footer";
-import Header from "@/components/header";
-import Loading from "@/components/loading";
-import { Website } from "@/types/website";
+import Footer from '@/components/footer';
+import Header from '@/components/header';
+import Loading from '@/components/loading';
+import { Website } from '@/types/website';
 
 export default function TopPage() {
   // 未ログインの場合はログインページへ
@@ -47,7 +47,7 @@ export default function TopPage() {
 
       <div className="w-full bg-[#f8f8f8]">
         <div className="mb-8 flex items-center bg-white">
-          <h3 className="container text-xl p-8">すべてのLPの一覧</h3>
+          <h3 className="container text-xl p-8">テンプレートの一覧</h3>
         </div>
         <div className="container mx-auto flex min-h-screen flex-col py-8">
           {loading ? (
