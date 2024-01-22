@@ -76,7 +76,7 @@ export default function Edit({ id }) {
   // IDからタイトルを更新する
   const updateWebsiteTitle = async (newTitle: string) => {
     setSaving(true); // 保存を開始
-    const response = await fetch(`/api/website/update/${id}`, {
+    const response = await fetch(`/api/website/updateTitle/${id}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -237,19 +237,12 @@ export default function Editor({ website }: EditorProps) {
           language: selectedLanguage,
           content: html,
         }),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Success:", data);
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-        });
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      });
     },
     [selectedLanguage, website.id]
   );
@@ -274,19 +267,106 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [mode, selectedLanguage, localizedHtmls]);
 
-  // codeステートが更新された場合にハイライトを適用
+  // cursorIndexを状態として管理
+  const [cursorIndex, setCursorIndex] = useState<number | null>(0);
+
+  // カーソル位置を保存する関数
+  const saveCursorPosition = () => {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      const startNode = range.startContainer;
+      const startOffset = range.startOffset;
+
+      let cursorPos = startOffset;
+      let node = startNode;
+      while (node) {
+        if (node === textAreaRef.current) {
+          break;
+        }
+        if (node.previousSibling) {
+          node = node.previousSibling;
+          cursorPos += node.textContent.length;
+        } else {
+          node = node.parentNode;
+        }
+      }
+
+      setCursorIndex(cursorPos);
+    }
+  };
+
+  // カーソル位置を復元する関数
+  const restoreCursorPosition = useCallback(() => {
+    if (cursorIndex !== null && textAreaRef.current) {
+      const textNode = textAreaRef.current.firstChild;
+      if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+        const range = document.createRange();
+        const selection = window.getSelection();
+        const safeOffset = Math.min(cursorIndex, textNode.textContent.length);
+        range.setStart(textNode, safeOffset);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+  }, [cursorIndex, textAreaRef]);
+
+  // useEffectを使用してcodeの状態が更新された後にカーソル位置を復元する
+  useEffect(() => {
+    if (mode === "code" && cursorIndex !== null) {
+      // DOMの更新が完了するのを確実に待つ
+      const timeoutId = setTimeout(() => {
+        setCursorPosition(cursorIndex);
+      }, 0); // 0ミリ秒の遅延を設けることで次のイベントループで実行されるようにする
+
+      // クリーンアップ関数でタイマーをクリア
+      return () => clearTimeout(timeoutId);
+    }
+  }, [code, mode, cursorIndex, setCursorPosition]);
+
+  // コードモードで入力データを更新する
+  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+    if (!isComposing) {
+      const target = e.target as HTMLElement;
+      const newHtml = target.textContent || "";
+
+      // カーソル位置を保存
+      saveCursorPosition();
+
+      // 選択された言語のHTMLを更新
+      const localizedHtml = website.localizedHtml.find(
+        (html) => html.language === selectedLanguage
+      );
+      if (localizedHtml) {
+        localizedHtml.content = newHtml;
+      }
+
+      // 新しいHTMLコンテンツを設定
+      setHtml(newHtml);
+      setCode(newHtml); // DOMの更新をトリガー
+
+      // 行番号を更新
+      setLineNumbers(
+        newHtml.split("\n").map((_, index) => (index + 1).toString())
+      );
+
+      // カーソル位置を復元
+      restoreCursorPosition();
+    }
+  };
+
   useEffect(() => {
     if (mode === "code") {
-      // 次のフレームでハイライト処理を実行する
-      requestAnimationFrame(() => {
-        document.querySelectorAll("pre code").forEach((block) => {
-          // ハイライトが既に適用されている場合はリセットする
-          block.removeAttribute("data-highlighted");
-          hljs.highlightBlock(block as HTMLElement);
-        });
-      });
+      // DOMの更新が完了するのを確実に待つ
+      const timeoutId = setTimeout(() => {
+        restoreCursorPosition();
+      }, 0); // 0ミリ秒の遅延を設けることで次のイベントループで実行されるようにする
+
+      // クリーンアップ関数でタイマーをクリア
+      return () => clearTimeout(timeoutId);
     }
-  }, [code, mode]);
+  }, [code, mode, restoreCursorPosition]);
 
   // 行番号の更新
   useEffect(() => {
@@ -306,45 +386,21 @@ export default function Editor({ website }: EditorProps) {
     });
   }, [code]);
 
-  // カーソル位置を復元する関数
-  const restoreCursorPosition = useCallback(() => {
-    if (cursorPosition !== null && textAreaRef.current) {
-      const textArea = textAreaRef.current;
-      const node = textArea.firstChild;
-
-      if (node) {
-        const range = document.createRange();
-        const sel = window.getSelection();
-        range.setStart(node, Math.min(cursorPosition, node.textContent.length));
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-      }
-    }
-  }, [cursorPosition, textAreaRef]);
-
-  // カーソル位置を保存し、ステートを更新する関数
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLDivElement;
-    const newHtml = target.innerText;
-
-    // カーソル位置を保存
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      setCursorPosition(range.startOffset);
-    }
-
-    // ステートを更新
-    setHtml(newHtml);
-    setCode(newHtml);
-  };
-
-  // カーソル位置を復元するuseEffect
+  // codeステートが更新された場合にハイライトを適用
   useEffect(() => {
-    // ステートの更新がDOMに反映された後にカーソル位置を復元
-    requestAnimationFrame(restoreCursorPosition);
-  }, [cursorPosition, restoreCursorPosition]);
+    if (mode === "code") {
+      // 次のフレームでハイライト処理を実行する
+      requestAnimationFrame(() => {
+        document.querySelectorAll("pre code").forEach((block) => {
+          // ハイライトが既に適用されている場合はリセットする
+          block.removeAttribute("data-highlighted");
+          hljs.highlightBlock(block as HTMLElement);
+        });
+        // ハイライト処理後にカーソル位置を復元
+        setCursorPosition(cursorPosition);
+      });
+    }
+  }, [code, mode, cursorPosition, setCursorPosition]);
 
   // 選択された言語のHTMLをサーバーに送信
   useEffect(() => {
@@ -422,7 +478,7 @@ export default function Editor({ website }: EditorProps) {
                     className={
                       selectedLanguage === language
                         ? "border border-primary text-primary mr-2 px-4 py-1 rounded-full"
-                        : "border mr-2 px-4 py-1 rounded-full"
+                        : "border border-[#bbb] mr-2 px-4 py-1 text-[#bbb] rounded-full"
                     }
                   >
                     {language}
@@ -492,92 +548,7 @@ export default function Editor({ website }: EditorProps) {
                             .map((_, index) => (index + 1).toString())
                         );
                       }}
-                      onInput={(e) => {
-                        if (!isComposing) {
-                          let newHtml = (e.target as HTMLElement).innerText;
-
-                          // 選択された言語のHTMLを更新
-                          const localizedHtml = website.localizedHtml.find(
-                            (html) => html.language === selectedLanguage
-                          );
-                          if (localizedHtml) {
-                            localizedHtml.content = newHtml;
-                          }
-
-                          setHtml(newHtml);
-                          setCode(newHtml);
-
-                          const selection = document.getSelection();
-                          if (selection && selection.rangeCount > 0) {
-                            const range = selection.getRangeAt(0);
-                            if (range.startContainer === range.endContainer) {
-                              const start =
-                                range.startOffset +
-                                newHtml.substr(
-                                  0,
-                                  newHtml.indexOf(
-                                    range.startContainer.textContent
-                                  )
-                                ).length;
-                              setCursorPosition(start); // カーソル位置を保存
-                            }
-                          }
-
-                          setLineNumbers(
-                            newHtml
-                              .split("\n")
-                              .map((_, index) => (index + 1).toString())
-                          );
-
-                          // 既存のタイマーがあればクリア
-                          if (timerRef.current) {
-                            clearTimeout(timerRef.current);
-                          }
-
-                          // 新しいタイマーを設定
-                          timerRef.current = setTimeout(() => {
-                            try {
-                              // HTMLを解析
-                              const parser = new DOMParser();
-                              const doc = parser.parseFromString(
-                                newHtml,
-                                "text/html"
-                              );
-
-                              // HTML要素をWebsiteElementに変換
-                              const elements = Array.from(
-                                doc.body.children
-                              ).map((element) => {
-                                return {
-                                  type: element.tagName.toLowerCase(),
-                                  // 実際の要素の内容を反映
-                                  content: element.innerHTML,
-                                };
-                              });
-
-                              // componentsステートを更新
-                              setComponents(elements);
-
-                              // 生成したHTMLをサーバーに送信
-                              // htmlが空でない場合のみ送信
-                              if (newHtml && selectedLanguage) {
-                                fetch(`/api/website/update/${website.id}`, {
-                                  method: "POST",
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                  },
-                                  body: JSON.stringify({
-                                    language: selectedLanguage,
-                                    content: newHtml,
-                                  }),
-                                });
-                              }
-                            } catch (error) {
-                              console.error("Failed to parse HTML:", error);
-                            }
-                          }, 3000); // 3秒後に実行
-                        }
-                      }}
+                      onInput={handleInput}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !isComposing) {
                           e.preventDefault(); // エンターキーが押されたときのデフォルトの挙動を防ぐ
