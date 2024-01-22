@@ -165,6 +165,7 @@ export default function Edit({ id }) {
           <div className="flex items-center">
             {/* LPタイトル */}
             <input
+              id="lp-title"
               type="text"
               value={inputValue} // 入力値を保持するステートを使用
               onCompositionStart={() => setIsComposing(true)}

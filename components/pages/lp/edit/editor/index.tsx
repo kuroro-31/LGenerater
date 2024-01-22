@@ -20,13 +20,8 @@ export default function Editor({ website }: EditorProps) {
   const [code, setCode] = useState("");
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [lineNumbers, setLineNumbers] = useState<string[]>([]);
-  const [highlightedCodeWithCursor, setHighlightedCodeWithCursor] = useState({
-    __html: "",
-  });
   const textAreaRef = useRef<HTMLDivElement>(null); // HTMLDivElementに変更
   const timerRef = useRef<number | null>(null);
-  const [textAreaHeight, setTextAreaHeight] = useState<number>(0);
-  const highlightPreviewRef = useRef<HTMLPreElement>(null);
   const [isComposing, setIsComposing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(
     Language.JP
@@ -44,6 +39,9 @@ export default function Editor({ website }: EditorProps) {
   const [selectedElement, setSelectedElement] = useState<WebsiteElement | null>(
     null
   );
+  // 保存の状態を管理するステート
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   /*
   |--------------------------------------------------------------------------
@@ -267,72 +265,11 @@ export default function Editor({ website }: EditorProps) {
     }
   }, [mode, selectedLanguage, localizedHtmls]);
 
-  // cursorIndexを状態として管理
-  const [cursorIndex, setCursorIndex] = useState<number | null>(0);
-
-  // カーソル位置を保存する関数
-  const saveCursorPosition = () => {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const startNode = range.startContainer;
-      const startOffset = range.startOffset;
-
-      let cursorPos = startOffset;
-      let node = startNode;
-      while (node) {
-        if (node === textAreaRef.current) {
-          break;
-        }
-        if (node.previousSibling) {
-          node = node.previousSibling;
-          cursorPos += node.textContent.length;
-        } else {
-          node = node.parentNode;
-        }
-      }
-
-      setCursorIndex(cursorPos);
-    }
-  };
-
-  // カーソル位置を復元する関数
-  const restoreCursorPosition = useCallback(() => {
-    if (cursorIndex !== null && textAreaRef.current) {
-      const textNode = textAreaRef.current.firstChild;
-      if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-        const range = document.createRange();
-        const selection = window.getSelection();
-        const safeOffset = Math.min(cursorIndex, textNode.textContent.length);
-        range.setStart(textNode, safeOffset);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-    }
-  }, [cursorIndex, textAreaRef]);
-
-  // useEffectを使用してcodeの状態が更新された後にカーソル位置を復元する
-  useEffect(() => {
-    if (mode === "code" && cursorIndex !== null) {
-      // DOMの更新が完了するのを確実に待つ
-      const timeoutId = setTimeout(() => {
-        setCursorPosition(cursorIndex);
-      }, 0); // 0ミリ秒の遅延を設けることで次のイベントループで実行されるようにする
-
-      // クリーンアップ関数でタイマーをクリア
-      return () => clearTimeout(timeoutId);
-    }
-  }, [code, mode, cursorIndex, setCursorPosition]);
-
   // コードモードで入力データを更新する
   const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
     if (!isComposing) {
       const target = e.target as HTMLElement;
       const newHtml = target.textContent || "";
-
-      // カーソル位置を保存
-      saveCursorPosition();
 
       // 選択された言語のHTMLを更新
       const localizedHtml = website.localizedHtml.find(
@@ -344,29 +281,25 @@ export default function Editor({ website }: EditorProps) {
 
       // 新しいHTMLコンテンツを設定
       setHtml(newHtml);
-      setCode(newHtml); // DOMの更新をトリガー
+      setSaving(true); // 保存を開始
+
+      // 以前のタイマーをクリア
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+
+      // 3秒後にコードステートを更新
+      timerRef.current = window.setTimeout(() => {
+        setCode(newHtml); // DOMの更新をトリガー
+        setSaving(false); // 保存を終了
+      }, 2000);
 
       // 行番号を更新
       setLineNumbers(
         newHtml.split("\n").map((_, index) => (index + 1).toString())
       );
-
-      // カーソル位置を復元
-      restoreCursorPosition();
     }
   };
-
-  useEffect(() => {
-    if (mode === "code") {
-      // DOMの更新が完了するのを確実に待つ
-      const timeoutId = setTimeout(() => {
-        restoreCursorPosition();
-      }, 0); // 0ミリ秒の遅延を設けることで次のイベントループで実行されるようにする
-
-      // クリーンアップ関数でタイマーをクリア
-      return () => clearTimeout(timeoutId);
-    }
-  }, [code, mode, restoreCursorPosition]);
 
   // 行番号の更新
   useEffect(() => {
@@ -420,57 +353,11 @@ export default function Editor({ website }: EditorProps) {
         className="editor flex w-full h-full mt-[50px]"
         onClick={() => setSelectedElement(null)} // canvas-content以外要素クリックでクイック編集閉
       >
-        {/* LP情報設定 */}
-        {/* <div
-          className={`properties-panel fixed top-[50px] left-0 w-[288px] h-screen overflow-auto transition-all duration-400 ease-in-out transform ${
-            selectedElement
-              ? "translate-x-0 opacity-100 visible"
-              : "-translate-x-full opacity-0 invisible"
-          }`}
-          onClick={(e) => e.stopPropagation()} // クイック編集以外の要素クリックでクイック編集閉
-        >
-          <div className="bg-white shadow-lg rounded-lg p-4 h-full">
-            <div className="flex justify-between items-center border-b pb-3 mb-3">
-              <h2 className="font-normal">クイック編集</h2>
-              <button
-                onClick={() => setSelectedElement(null)}
-                className="text-gray-500"
-              >
-                <XIcon className="w-6 h-6" />
-              </button>
-            </div>
-
-            <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
-            <input
-              className="w-full p-2 border border-primary rounded mb-4"
-              value={selectedElement?.content || ""}
-              onChange={(e) =>
-                setSelectedElement({
-                  ...selectedElement,
-                  content: e.target.value,
-                })
-              }
-            />
-            {Object.entries(selectedElement?.props || {}).map(
-              ([key, value]) => (
-                <div key={key} className="mb-2">
-                  <label className="block font-bold mb-1">{key}</label>
-                  <input
-                    className="w-full p-2 border border-primary rounded"
-                    value={value}
-                    onChange={(e) => updateElement({ [key]: e.target.value })}
-                  />
-                </div>
-              )
-            )}
-          </div>
-        </div> */}
-
         <div className="canvas relative w-full flex flex-col items-center min-h-[500px] pt-8">
           <div className="mb-12">
             <div className="flex justify-between mb-4">
-              {/* 言語切り替えトグル */}
-              <div>
+              <div className="flex items-center">
+                {/* 言語切り替えトグル */}
                 {languages.map((language) => (
                   <button
                     key={language}
@@ -484,6 +371,16 @@ export default function Editor({ website }: EditorProps) {
                     {language}
                   </button>
                 ))}
+
+                {/* 保存状態 */}
+                {saving && (
+                  <div className="ml-4 text-xs text-gray-400">
+                    保存しています...
+                  </div>
+                )}
+                {saved && (
+                  <div className="ml-4 text-xs text-gray-400">保存しました</div>
+                )}
               </div>
 
               {/* モード切り替え */}
