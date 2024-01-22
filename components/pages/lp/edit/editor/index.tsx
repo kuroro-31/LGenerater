@@ -266,7 +266,7 @@ export default function Editor({ website }: EditorProps) {
   }, [mode, selectedLanguage, localizedHtmls]);
 
   // コードモードで入力データを更新する
-  const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
+  const handleCodeInput = (e: React.FormEvent<HTMLDivElement>) => {
     if (!isComposing) {
       const target = e.target as HTMLElement;
       const newHtml = target.textContent || "";
@@ -445,7 +445,7 @@ export default function Editor({ website }: EditorProps) {
                             .map((_, index) => (index + 1).toString())
                         );
                       }}
-                      onInput={handleInput}
+                      onInput={handleCodeInput}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !isComposing) {
                           e.preventDefault(); // エンターキーが押されたときのデフォルトの挙動を防ぐ
