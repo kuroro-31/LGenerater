@@ -120,6 +120,28 @@ export default function Editor({ website }: EditorProps) {
     }
   };
 
+  // サーバーに更新を送信する関数
+  const sendUpdateToServer = useCallback(
+    (html: string): Promise<void> => {
+      return fetch(`/api/website/update/${website.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          language: selectedLanguage,
+          content: html,
+        }),
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      });
+    },
+    [selectedLanguage, website.id]
+  );
+
   /*
   |--------------------------------------------------------------------------
   |ビジュアルモード
@@ -166,14 +188,12 @@ export default function Editor({ website }: EditorProps) {
 
   // ビジュアルモードで要素をクリックしたときにクイック編集を開始
   const openQuickEdit = (e: React.MouseEvent<HTMLDivElement>) => {
-    // すべての要素からhoverスタイルを削除
-    document.querySelectorAll(".hover-style").forEach((el) => {
-      el.classList.remove("hover-style");
-    });
-
     e.stopPropagation();
     e.preventDefault(); // デフォルトの挙動をキャンセル
     const element = e.target as HTMLElement;
+
+    // div要素の場合はクイック編集を開始しない
+    if (element.tagName.toLowerCase() === "div") return;
 
     setSelectedElement({
       type: element.tagName.toLowerCase(),
@@ -199,7 +219,11 @@ export default function Editor({ website }: EditorProps) {
     const element = e.target as HTMLElement;
 
     // 直接hoverされた要素にhoverスタイルを適用
-    if (!element.classList.contains("canvas-content")) {
+    // div要素はhoverスタイルの対象外とする
+    if (
+      !element.classList.contains("canvas-content") &&
+      element.tagName.toLowerCase() !== "div"
+    ) {
       element.classList.add("hover-style");
     }
   };
@@ -214,65 +238,40 @@ export default function Editor({ website }: EditorProps) {
       };
       setSelectedElement(updatedElement);
 
-      // 更新された要素を含む新しいHTMLを生成
-      const newHtml = generateHtmlWithUpdatedElement(updatedElement);
-
-      // 新しいHTMLコンテンツをstateに設定
-      setHtml(newHtml);
-      setSaving(true); // 保存を開始
-
-      // サーバーに更新を送信
-      sendUpdateToServer(newHtml)
-        .then(() => {
-          setSaving(false); // 保存を終了
-          setSaved(true); // 保存が完了したことを示す
-          // 保存完了の状態をリセットするタイマー
-          setTimeout(() => setSaved(false), 2000);
-        })
-        .catch((error) => {
-          console.error("Failed to save changes:", error);
-          // エラー処理をここに追加
-        });
+      // components配列も更新する
+      const updatedComponents = components.map((component) => {
+        if (component === selectedElement) {
+          return updatedElement;
+        }
+        return component;
+      });
+      setComponents(updatedComponents);
     }
   };
 
-  // HTMLを生成する関数
-  const generateHtmlWithUpdatedElement = (
-    updatedElement: WebsiteElement
-  ): string => {
-    // ここでupdatedElementを元に新しいHTMLを生成する処理を実装する
-    // 簡単な例として、単一の要素のみを更新する場合のコードを示します
-    return components
-      .map((component) => {
-        if (component === selectedElement) {
-          return generateHtmlFromComponents([updatedElement]);
-        }
-        return generateHtmlFromComponents([component]);
-      })
-      .join("");
-  };
-
-  // サーバーに更新を送信する関数
-  const sendUpdateToServer = useCallback(
-    (html: string): Promise<void> => {
-      return fetch(`/api/website/update/${website.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          language: selectedLanguage,
-          content: html,
-        }),
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      });
-    },
-    [selectedLanguage, website.id]
-  );
+  // components配列が更新されたときにHTMLを再生成
+  useEffect(() => {
+    if (components.length) {
+      const newHtml = generateHtmlFromComponents(components);
+      setHtml(newHtml);
+      // サーバーに更新を送信
+      sendUpdateToServer(newHtml)
+        .then(() => {
+          // 保存状態の更新
+          setSaving(false);
+          setSaved(true);
+          // 保存完了の通知など、ユーザーにフィードバックを提供する
+          // 例: Toast通知を表示するなど
+        })
+        .catch((error) => {
+          // エラー処理
+          setSaving(false);
+          // ユーザーにエラーを通知する
+          // 例: エラーメッセージを表示するなど
+          console.error("サーバーへの更新に失敗しました:", error);
+        });
+    }
+  }, [components, sendUpdateToServer]);
 
   /*
   |--------------------------------------------------------------------------
@@ -526,30 +525,37 @@ export default function Editor({ website }: EditorProps) {
                   </button>
                 </div>
 
-                <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
-                <input
-                  className="w-full p-2 border border-primary rounded mb-4"
-                  value={selectedElement?.content || ""}
-                  onChange={(e) =>
-                    setSelectedElement({
-                      ...selectedElement,
-                      content: e.target.value,
-                    })
-                  }
-                />
+                {selectedElement?.type !== "div" && (
+                  <>
+                    <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
+                    <input
+                      className="w-full p-2 border border-primary rounded mb-4"
+                      value={selectedElement?.content || ""}
+                      onChange={(e) =>
+                        setSelectedElement({
+                          ...selectedElement,
+                          content: e.target.value,
+                        })
+                      }
+                    />
+                  </>
+                )}
                 {Object.entries(selectedElement?.props || {}).map(
-                  ([key, value]) => (
-                    <div key={key} className="mb-2">
-                      <label className="block font-bold mb-1">{key}</label>
-                      <input
-                        className="w-full p-2 border border-primary rounded"
-                        value={value}
-                        onChange={(e) =>
-                          updateElement({ [key]: e.target.value })
-                        }
-                      />
-                    </div>
-                  )
+                  ([key, value]) => {
+                    if (key === "class") return null; // classとdiv属性は編集から除外
+                    return (
+                      <div key={key} className="mb-2">
+                        <label className="block font-bold mb-1">{key}</label>
+                        <input
+                          className="w-full p-2 border border-primary rounded"
+                          value={value}
+                          onChange={(e) =>
+                            updateElement({ [key]: e.target.value })
+                          }
+                        />
+                      </div>
+                    );
+                  }
                 )}
               </div>
             </div>
