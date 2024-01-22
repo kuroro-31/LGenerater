@@ -165,7 +165,12 @@ export default function Editor({ website }: EditorProps) {
   };
 
   // ビジュアルモードで要素をクリックしたときにクイック編集を開始
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const openQuickEdit = (e: React.MouseEvent<HTMLDivElement>) => {
+    // すべての要素からhoverスタイルを削除
+    document.querySelectorAll(".hover-style").forEach((el) => {
+      el.classList.remove("hover-style");
+    });
+
     e.stopPropagation();
     e.preventDefault(); // デフォルトの挙動をキャンセル
     const element = e.target as HTMLElement;
@@ -173,7 +178,9 @@ export default function Editor({ website }: EditorProps) {
     setSelectedElement({
       type: element.tagName.toLowerCase(),
       props: Array.from(element.attributes).reduce((acc, attr) => {
-        acc[attr.name] = attr.value;
+        if (attr.name === "class") {
+          acc[attr.name] = attr.value;
+        }
         return acc;
       }, {}),
       content: element.innerHTML,
@@ -207,26 +214,48 @@ export default function Editor({ website }: EditorProps) {
       };
       setSelectedElement(updatedElement);
 
-      // サーバーに送信するためのHTMLを生成
+      // 更新された要素を含む新しいHTMLを生成
       const newHtml = generateHtmlWithUpdatedElement(updatedElement);
 
+      // 新しいHTMLコンテンツをstateに設定
+      setHtml(newHtml);
+      setSaving(true); // 保存を開始
+
       // サーバーに更新を送信
-      sendUpdateToServer(newHtml);
+      sendUpdateToServer(newHtml)
+        .then(() => {
+          setSaving(false); // 保存を終了
+          setSaved(true); // 保存が完了したことを示す
+          // 保存完了の状態をリセットするタイマー
+          setTimeout(() => setSaved(false), 2000);
+        })
+        .catch((error) => {
+          console.error("Failed to save changes:", error);
+          // エラー処理をここに追加
+        });
     }
   };
 
-  // HTMLを生成する関数（ダミーの実装）
+  // HTMLを生成する関数
   const generateHtmlWithUpdatedElement = (
     updatedElement: WebsiteElement
   ): string => {
     // ここでupdatedElementを元に新しいHTMLを生成する処理を実装する
-    return "";
+    // 簡単な例として、単一の要素のみを更新する場合のコードを示します
+    return components
+      .map((component) => {
+        if (component === selectedElement) {
+          return generateHtmlFromComponents([updatedElement]);
+        }
+        return generateHtmlFromComponents([component]);
+      })
+      .join("");
   };
 
   // サーバーに更新を送信する関数
   const sendUpdateToServer = useCallback(
-    (html: string) => {
-      fetch(`/api/website/update/${website.id}`, {
+    (html: string): Promise<void> => {
+      return fetch(`/api/website/update/${website.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -399,20 +428,10 @@ export default function Editor({ website }: EditorProps) {
                   dangerouslySetInnerHTML={{ __html: html }}
                   onClick={(e) => {
                     e.stopPropagation(); // canvas-content以外要素クリックでクイック編集閉
-                    handleClick(e);
+                    openQuickEdit(e);
                   }}
                   onMouseOver={handleHover}
                 />
-                <style>
-                  {`
-                  .hover-style {
-                    background-color: rgba(111, 86, 249, 0.15);
-                    border: 1px solid rgba(111, 86, 249, 1);
-                    cursor: pointer;
-                    border-radius: 2px;
-                  }
-              `}
-                </style>
               </>
             ) : (
               <div className="w-full h-full min-w-[870px] max-w-[870px] mb-8">

@@ -210,3 +210,10 @@ body {
 .desktop-prev__body {
   @apply min-h-screen;
 }
+
+.hover-style {
+  background-color: rgba(111, 86, 249, 0.15);
+  border: 1px solid rgba(111, 86, 249, 1);
+  cursor: pointer;
+  border-radius: 2px;
+}
