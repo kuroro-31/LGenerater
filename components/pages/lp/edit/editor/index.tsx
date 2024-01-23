@@ -465,7 +465,7 @@ export default function Editor({ website }: EditorProps) {
                     className={
                       selectedLanguage === language
                         ? "border border-primary text-primary mr-2 px-4 py-1 rounded-full"
-                        : "border border-[#bbb] mr-2 px-4 py-1 text-[#bbb] rounded-full"
+                        : "mr-2 px-4 py-1 rounded-full"
                     }
                   >
                     {language}
@@ -474,13 +474,9 @@ export default function Editor({ website }: EditorProps) {
 
                 {/* 保存状態 */}
                 {saving && (
-                  <div className="ml-4 text-xs text-gray-400">
-                    保存しています...
-                  </div>
+                  <div className="ml-4 text-xs">保存しています...</div>
                 )}
-                {saved && (
-                  <div className="ml-4 text-xs text-gray-400">保存しました</div>
-                )}
+                {saved && <div className="ml-4 text-xs">保存しました</div>}
               </div>
 
               {/* モード切り替え */}
