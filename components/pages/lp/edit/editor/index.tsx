@@ -203,6 +203,9 @@ export default function Editor({ website }: EditorProps) {
     e.preventDefault(); // デフォルトの挙動をキャンセル
     const element = e.target as HTMLElement;
 
+    // hover-style クラスを削除
+    element.classList.remove("hover-style");
+
     setSelectedElement({
       type: element.tagName.toLowerCase(),
       props: Array.from(element.attributes).reduce((acc, attr) => {
