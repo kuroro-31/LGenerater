@@ -5,6 +5,7 @@ import { XIcon } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { v4 as uuidv4 } from 'uuid';
 
 import { Language, LocalizedHtml, Website } from '@/types/website';
 import { WebsiteElement } from '@/types/websiteElement';
@@ -132,12 +133,22 @@ export default function Editor({ website }: EditorProps) {
           language: selectedLanguage,
           content: html,
         }),
-      }).then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      });
+      })
+        .then((response) => {
+          if (!response.ok) {
+            // エラーレスポンスの場合、エラー内容をログに出力
+            console.error(`Server responded with status: ${response.status}`);
+            return response.text().then((text) => {
+              throw new Error(`Server response: ${text}`);
+            });
+          }
+          return response.json();
+        })
+        .catch((error) => {
+          // エラーをキャッチして適切に処理
+          console.error("Failed to send update to server:", error);
+          // ここでユーザーにエラーを通知するためのUIの更新を行う
+        });
     },
     [selectedLanguage, website.id]
   );
@@ -192,9 +203,6 @@ export default function Editor({ website }: EditorProps) {
     e.preventDefault(); // デフォルトの挙動をキャンセル
     const element = e.target as HTMLElement;
 
-    // div要素の場合はクイック編集を開始しない
-    if (element.tagName.toLowerCase() === "div") return;
-
     setSelectedElement({
       type: element.tagName.toLowerCase(),
       props: Array.from(element.attributes).reduce((acc, attr) => {
@@ -220,58 +228,119 @@ export default function Editor({ website }: EditorProps) {
 
     // 直接hoverされた要素にhoverスタイルを適用
     // div要素はhoverスタイルの対象外とする
-    if (
-      !element.classList.contains("canvas-content") &&
-      element.tagName.toLowerCase() !== "div"
-    ) {
+    if (!element.classList.contains("canvas-content")) {
       element.classList.add("hover-style");
     }
   };
 
   // クイック編集でプロパティを更新する関数
-  const updateElement = (newProps: { [key: string]: any }) => {
-    if (selectedElement) {
-      // 新しいプロパティでselectedElementを更新
+  const updateElement = (
+    newProps: { [key: string]: any },
+    newContent?: string
+  ) => {
+    if (selectedElement && "id" in selectedElement) {
+      // selectedElementにidが含まれていることを確認
+      // 新しいプロパティとコンテンツでselectedElementを更新
       const updatedElement = {
         ...selectedElement,
         props: { ...selectedElement.props, ...newProps },
+        content:
+          newContent !== undefined ? newContent : selectedElement.content,
       };
-      setSelectedElement(updatedElement);
 
-      // components配列も更新する
+      // components 配列を更新
       const updatedComponents = components.map((component) => {
-        if (component === selectedElement) {
-          return updatedElement;
+        if ("id" in component && component.id === selectedElement.id) {
+          // 各componentにidが含まれていることを確認
+          return { ...component, ...updatedElement }; // 更新された要素で置き換え
         }
         return component;
       });
+
+      if (updatedComponents.length === 0) {
+        console.error(
+          "updateElement: No components were updated. Check the ids."
+        );
+        return;
+      }
+
+      // 更新されたselectedElementとcomponents配列をstateに設定する
+      setSelectedElement(updatedElement);
       setComponents(updatedComponents);
+      // その他のステート更新処理...
+    } else {
+      console.error("updateElement: selectedElement does not have an id.");
     }
   };
 
-  // components配列が更新されたときにHTMLを再生成
-  useEffect(() => {
-    if (components.length) {
-      const newHtml = generateHtmlFromComponents(components);
-      setHtml(newHtml);
-      // サーバーに更新を送信
-      sendUpdateToServer(newHtml)
+  // 主要プロパティのinputのonChangeハンドラー
+  const updateMainProperty = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const updatedContent = e.target.value;
+
+    if (!selectedElement) {
+      console.error("updateMainProperty: No selected element to update");
+      return;
+    }
+
+    // selectedElementにidがなければ新しいidを生成
+    const elementId = selectedElement.id || uuidv4();
+
+    // selectedElementにidを追加する例
+    const newSelectedElement = {
+      ...selectedElement,
+      id: elementId,
+      content: updatedContent,
+    };
+
+    // components 配列も新しい selectedElement で更新する
+    let updatedComponents = components.map((component) =>
+      component.id === elementId
+        ? { ...component, content: updatedContent }
+        : component
+    );
+
+    if (updatedComponents.length === 0) {
+      updatedComponents = [newSelectedElement]; // 新しい要素を配列に追加
+    }
+
+    // 更新されたselectedElementとcomponents配列をstateに設定する
+    setSelectedElement(newSelectedElement);
+    setComponents(updatedComponents);
+
+    const updatedHtml = generateHtmlFromComponents(updatedComponents);
+    setHtml(updatedHtml); // ビジュアルモードのHTMLを更新
+
+    // localizedHtmls と html ステートを更新する
+    const updatedLocalizedHtmls = localizedHtmls.map((localizedHtml) => {
+      if (localizedHtml.language === selectedLanguage) {
+        return {
+          ...localizedHtml,
+          content: generateHtmlFromComponents(updatedComponents),
+        };
+      }
+      return localizedHtml;
+    });
+
+    setLocalizedHtmls(updatedLocalizedHtmls);
+    setSaving(true); // 保存を開始
+
+    // 以前のタイマーをクリア
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    // 2秒後にデータベースに保存
+    timerRef.current = window.setTimeout(() => {
+      sendUpdateToServer(updatedHtml)
         .then(() => {
-          // 保存状態の更新
-          setSaving(false);
-          setSaved(true);
-          // 保存完了の通知など、ユーザーにフィードバックを提供する
-          // 例: Toast通知を表示するなど
+          setSaving(false); // 保存を終了
+          setSaved(true); // 保存完了状態を設定
         })
         .catch((error) => {
-          // エラー処理
-          setSaving(false);
-          // ユーザーにエラーを通知する
-          // 例: エラーメッセージを表示するなど
-          console.error("サーバーへの更新に失敗しました:", error);
+          console.error("Failed to send update to server:", error);
         });
-    }
-  }, [components, sendUpdateToServer]);
+    }, 2000);
+  };
 
   /*
   |--------------------------------------------------------------------------
@@ -525,21 +594,15 @@ export default function Editor({ website }: EditorProps) {
                   </button>
                 </div>
 
-                {selectedElement?.type !== "div" && (
-                  <>
-                    <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
-                    <input
-                      className="w-full p-2 border border-primary rounded mb-4"
-                      value={selectedElement?.content || ""}
-                      onChange={(e) =>
-                        setSelectedElement({
-                          ...selectedElement,
-                          content: e.target.value,
-                        })
-                      }
-                    />
-                  </>
-                )}
+                {/* 主要プロパティ */}
+                <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
+                <input
+                  className="w-full p-2 border border-primary rounded mb-4"
+                  value={selectedElement?.content || ""}
+                  onChange={updateMainProperty}
+                />
+
+                {/* その他プロパティ */}
                 {Object.entries(selectedElement?.props || {}).map(
                   ([key, value]) => {
                     if (key === "class") return null; // classとdiv属性は編集から除外
