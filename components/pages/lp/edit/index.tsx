@@ -1,14 +1,14 @@
 "use client";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import EditHeader from '@/components/header/edit';
-import Loading from '@/components/loading';
-import { Website } from '@/types/website';
+import EditHeader from "@/components/header/edit";
+import Loading from "@/components/loading";
+import { Website } from "@/types/website";
 
-import Editor from './editor';
+import Editor from "./editor";
 
 export default function Edit({ id }) {
   const router = useRouter();
@@ -116,7 +116,7 @@ export default function Edit({ id }) {
   return (
     <div className="relative min-h-screen">
       {isModalOpen && (
-        <div className="w-full min-h-screen max-h-screen fixed z-[100] top-0 left-0 right-0 bottom-0 p-4 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="w-full min-h-screen max-h-screen fixed z-[9999] top-0 left-0 right-0 bottom-0 p-4 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6">
             <div className="text-lg">本当に削除してもよろしいですか？</div>
             <div className="flex justify-end mt-6">
@@ -135,7 +135,7 @@ export default function Edit({ id }) {
       )}
 
       {isDownloadModalOpen && (
-        <div className="w-full min-h-screen max-h-screen fixed z-[100] top-0 left-0 right-0 bottom-0 p-4 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="w-full min-h-screen max-h-screen fixed z-[9999] top-0 left-0 right-0 bottom-0 p-4 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg p-6">
             <div className="text-lg">
               どの言語のHTMLをダウンロードしますか？

@@ -584,7 +584,7 @@ export default function Editor({ website }: EditorProps) {
             >
               <div className="bg-white shadow-lg p-4 h-full">
                 <div className="flex justify-between items-center border-b pb-3 mb-3">
-                  <h2 className="font-normal">クイック編集</h2>
+                  <h2 className="text-[16px]">クイック編集</h2>
                   <button
                     onClick={() => setSelectedElement(null)}
                     className="text-gray-500"
@@ -594,7 +594,9 @@ export default function Editor({ website }: EditorProps) {
                 </div>
 
                 {/* 主要プロパティ */}
-                <h3 className="font-bold mb-2">{selectedElement?.type}</h3>
+                <h3 className="font-bold text-[16px] mb-2">
+                  {selectedElement?.type}
+                </h3>
                 <input
                   className="w-full p-2 border border-primary rounded mb-4"
                   value={selectedElement?.content || ""}
