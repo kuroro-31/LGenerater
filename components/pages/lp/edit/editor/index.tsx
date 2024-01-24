@@ -5,7 +5,6 @@ import { XIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { v4 as uuidv4 } from "uuid";
 
 import { Language, LocalizedHtml, Website } from "@/types/website";
 import { WebsiteElement } from "@/types/websiteElement";
@@ -277,72 +276,67 @@ export default function Editor({ website }: EditorProps) {
   // 主要プロパティのinputのonChangeハンドラー
   const updateMainProperty = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedContent = e.target.value;
+    console.log("Updated content:", updatedContent);
 
     if (!selectedElement) {
       console.error("updateMainProperty: No selected element to update");
       return;
     }
+    console.log("Selected element before update:", selectedElement);
 
-    // selectedElementにidがなければ新しいidを生成
-    const elementId = selectedElement.id || uuidv4();
-
-    // selectedElementにidを追加する例
+    // 新しい選択された要素の状態を作成
     const newSelectedElement = {
       ...selectedElement,
-      id: elementId,
       content: updatedContent,
     };
 
-    // components 配列も新しい selectedElement で更新する
-    let updatedComponents = components.map((component) =>
-      component.id === elementId
-        ? { ...component, content: updatedContent }
-        : component
+    // 選択された要素の状態を更新
+    setSelectedElement(newSelectedElement);
+
+    // 全体のHTMLを更新するために、選択された要素のみを更新後の要素で上書き
+    const updatedHtml = html.replace(
+      new RegExp(
+        `(<${selectedElement.type}[^>]*>).*?(</${selectedElement.type}>)`,
+        "i"
+      ),
+      `$1${updatedContent}$2`
     );
 
-    if (updatedComponents.length === 0) {
-      updatedComponents = [newSelectedElement]; // 新しい要素を配列に追加
-    }
+    console.log("Updated HTML:", updatedHtml);
+    setHtml(updatedHtml);
 
-    // 更新されたselectedElementとcomponents配列をstateに設定する
-    setSelectedElement(newSelectedElement);
-    setComponents(updatedComponents);
-
-    const updatedHtml = generateHtmlFromComponents(updatedComponents);
-    setHtml(updatedHtml); // ビジュアルモードのHTMLを更新
-
-    // localizedHtmls と html ステートを更新する
+    // ローカライズされたHTMLを更新
     const updatedLocalizedHtmls = localizedHtmls.map((localizedHtml) => {
       if (localizedHtml.language === selectedLanguage) {
         return {
           ...localizedHtml,
-          content: generateHtmlFromComponents(updatedComponents),
+          content: updatedHtml,
         };
       }
       return localizedHtml;
     });
 
+    console.log("Updated localized HTMLs:", updatedLocalizedHtmls);
     setLocalizedHtmls(updatedLocalizedHtmls);
-    setSaving(true); // 保存を開始
+    setSaving(true);
 
-    // 以前のタイマーをクリア
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
 
-    // 2秒後にデータベースに保存
     timerRef.current = window.setTimeout(() => {
+      console.log("Sending update to server:", updatedHtml);
       sendUpdateToServer(updatedHtml)
         .then(() => {
-          setSaving(false); // 保存を終了
-          setSaved(true); // 保存完了状態を設定
+          console.log("Update sent successfully");
+          setSaving(false);
+          setSaved(true);
         })
         .catch((error) => {
           console.error("Failed to send update to server:", error);
         });
     }, 2000);
   };
-
   /*
   |--------------------------------------------------------------------------
   |コードモード
