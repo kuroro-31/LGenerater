@@ -1,14 +1,14 @@
-import 'highlight.js/styles/atom-one-dark.css';
+import "highlight.js/styles/atom-one-dark.css";
 
-import hljs from 'highlight.js';
-import { XIcon } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { v4 as uuidv4 } from 'uuid';
+import hljs from "highlight.js";
+import { XIcon } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
+import { v4 as uuidv4 } from "uuid";
 
-import { Language, LocalizedHtml, Website } from '@/types/website';
-import { WebsiteElement } from '@/types/websiteElement';
+import { Language, LocalizedHtml, Website } from "@/types/website";
+import { WebsiteElement } from "@/types/websiteElement";
 
 interface EditorProps {
   website: Website;
@@ -19,9 +19,7 @@ export default function Editor({ website }: EditorProps) {
   const [html, setHtml] = useState<string>(website.html);
   const [mode, setMode] = useState<"visual" | "code">("visual");
   const [code, setCode] = useState("");
-  const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [lineNumbers, setLineNumbers] = useState<string[]>([]);
-  const textAreaRef = useRef<HTMLDivElement>(null); // HTMLDivElementに変更
   const timerRef = useRef<number | null>(null);
   const [isComposing, setIsComposing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(
@@ -429,11 +427,9 @@ export default function Editor({ website }: EditorProps) {
           block.removeAttribute("data-highlighted");
           hljs.highlightBlock(block as HTMLElement);
         });
-        // ハイライト処理後にカーソル位置を復元
-        setCursorPosition(cursorPosition);
       });
     }
-  }, [code, mode, cursorPosition, setCursorPosition]);
+  }, [code, mode]);
 
   // 選択された言語のHTMLをサーバーに送信
   useEffect(() => {
@@ -517,7 +513,6 @@ export default function Editor({ website }: EditorProps) {
                     <code
                       contentEditable
                       className="html outline-none w-full h-full"
-                      ref={textAreaRef}
                       onCompositionStart={(e) => {
                         setIsComposing(true);
                       }}
