@@ -27,7 +27,7 @@ export default function View({ id }) {
   }, [router]);
 
   // デスクトップとモバイルの表示切り替え
-  const [viewMode, setViewMode] = useState("mobile"); // 初期状態を'mobile'に設定
+  const [viewMode, setViewMode] = useState("desktop"); // 初期状態を'mobile'に設定
 
   // HTMLの取得
   const [htmlContent, setHtmlContent] = useState("");
