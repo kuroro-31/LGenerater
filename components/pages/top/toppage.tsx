@@ -5,15 +5,15 @@
 */
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
-import Footer from '@/components/footer';
-import Header from '@/components/header';
-import Loading from '@/components/loading';
-import { Website } from '@/types/website';
+import Footer from "@/components/footer";
+import Header from "@/components/header";
+import Loading from "@/components/loading";
+import { Website } from "@/types/website";
 
 export default function TopPage() {
   // 未ログインの場合はログインページへ
@@ -55,7 +55,7 @@ export default function TopPage() {
               <Loading />
             </div>
           ) : (
-            <div className="flex flex-wrap justify-between">
+            <div className="flex flex-wrap">
               {/* LP一覧 */}
               {websites.map((website) => (
                 <div key={website.id} className="w-1/3 mb-8">

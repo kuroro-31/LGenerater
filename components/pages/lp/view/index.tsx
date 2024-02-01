@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import ViewHeader from "@/components/header/view";
+import { Language, LocalizedHtml } from "@/types/website"; // 型をインポート
 
 export default function View({ id }) {
   // 未ログインの場合はログインページへ
@@ -30,26 +31,48 @@ export default function View({ id }) {
 
   // HTMLの取得
   const [htmlContent, setHtmlContent] = useState("");
+  const [language, setLanguage] = useState<Language>(Language.JP); // Language 型を使用
   useEffect(() => {
     async function fetchHtml() {
-      const url = `/api/website/${id}`; // URLを変更
-
+      const url = `/api/website/${id}?lang=${language}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
-        setHtmlContent(data.html); // レスポンスのプロパティを変更
+        // APIからのレスポンスをLocalizedHtml型として扱う
+        const localizedHtml: LocalizedHtml[] = data.localizedHtml;
+        // 選択された言語に対応するHTMLコンテンツを探す
+        const htmlForLanguage =
+          localizedHtml.find((html) => html.language === language)?.content ||
+          "";
+        setHtmlContent(htmlForLanguage);
       } else {
         console.error("Failed to fetch HTML content");
-        console.error(`Response status: ${res.status}`);
       }
     }
     fetchHtml();
-  }, [id]); // 依存配列にidを追加
+  }, [id, language]);
 
   return (
     <div>
       {/* ヘッダー */}
       <ViewHeader>
+        {/* 言語切り替えトグル */}
+        <div className="ml-12">
+          {Object.values(Language).map((lang) => (
+            <button
+              key={lang}
+              onClick={() => setLanguage(lang)}
+              className={
+                language === lang
+                  ? "border border-primary text-primary mr-2 px-4 py-1 rounded-full"
+                  : "mr-2 px-4 py-1 rounded-full"
+              }
+            >
+              {lang}
+            </button>
+          ))}{" "}
+        </div>
+
         <div className="flex items-center ml-auto mr-16">
           {/* プレビュー切り替え */}
           <button
